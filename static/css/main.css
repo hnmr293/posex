@@ -1,0 +1,26 @@
+/*#main-canvas {
+    width: 512px;
+    height: 512px;
+}*/
+
+#cont {
+    display: flex;
+    flex-flow: column;
+    width: 512px;
+    gap: 1em 0;
+}
+
+.box {
+    display: block;
+    width: 512px;
+    border: 1px solid gray;
+    padding: 0.5em 0;
+    text-decoration: none;
+    text-align: center;
+}
+
+#notation {
+    display: none;
+    position: absolute;
+    color: white;
+}
