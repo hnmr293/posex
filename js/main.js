@@ -375,14 +375,18 @@ function init_3d() {
         requestAnimationFrame(animate);
         controls.update();
 
-        // show limbs
         for (let [name, body] of bodies) {
             const { joints, limbs, group } = body;
+            // update joint size
+            for (let joint of joints) {
+                joint.scale.setScalar(1 / camera.zoom);
+            }
+            // show limbs
             const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
             for (let i = 0; i < limb_pairs.length; ++i) {
                 const [from_index, to_index] = limb_pairs[i];
                 const [from, to] = [joints[from_index], joints[to_index]];
-                limbs[i].geometry.setPoints([from.getWorldPosition(v1), to.getWorldPosition(v2)], p => LIMB_SIZE);
+                limbs[i].geometry.setPoints([from.getWorldPosition(v1), to.getWorldPosition(v2)], p => LIMB_SIZE / camera.zoom);
             }
         }
 
