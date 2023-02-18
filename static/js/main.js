@@ -127,12 +127,12 @@ function create_body(unit, x0, y0, z0) {
     return [joints, limbs];
 }
 
-function init_3d() {
+function init_3d(ui) {
     const
-        canvas = document.querySelector('#main_canvas'),
-        notation = document.querySelector('#notation'),
-        indicator1 = document.querySelector('#body_indicator1'),
-        indicator2 = document.querySelector('#body_indicator2'),
+        canvas = ui.canvas,
+        notation = ui.notation,
+        indicator1 = ui.indicator1,
+        indicator2 = ui.indicator2,
         width = () => canvas.width,
         height = () => canvas.height,
         unit = () => Math.min(width(), height()),
@@ -298,60 +298,65 @@ function init_3d() {
         }
     }, false);
 
-    document.querySelector('#all_reset').addEventListener('click', () => {
-        touched_body = null;
-        selected_body = null;
-        camera.position.set(0, 0, unit_max() * 2);
-        camera.rotation.set(0, 0, 0);
-        controls.reset();
-        for (let name of Array.from(bodies.keys()).slice(1)) {
-            remove_body(name);
-        }
-        for (let body of bodies.values()) {
-            body.reset(0, 0, 0);
-        }
-    }, false);
-
-    document.querySelector('#reset_camera').addEventListener('click', () => {
-        camera.position.set(0, 0, unit_max() * 2);
-        camera.rotation.set(0, 0, 0);
-        controls.reset();
-    }, false);
-
-    document.querySelector('#reset_pose').addEventListener('click', () => {
-        if (selected_body) {
-            selected_body.reset();
-        } else {
-            for (let [name, body] of bodies) {
-                body.reset();
+    if (ui.all_reset)
+        ui.all_reset.addEventListener('click', () => {
+            touched_body = null;
+            selected_body = null;
+            camera.position.set(0, 0, unit_max() * 2);
+            camera.rotation.set(0, 0, 0);
+            controls.reset();
+            for (let name of Array.from(bodies.keys()).slice(1)) {
+                remove_body(name);
             }
-        }
-    }, false);
+            for (let body of bodies.values()) {
+                body.reset(0, 0, 0);
+            }
+        }, false);
+
+    if (ui.reset_camera)
+        ui.reset_camera.addEventListener('click', () => {
+            camera.position.set(0, 0, unit_max() * 2);
+            camera.rotation.set(0, 0, 0);
+            controls.reset();
+        }, false);
+
+    if (ui.reset_pose)
+        ui.reset_pose.addEventListener('click', () => {
+            if (selected_body) {
+                selected_body.reset();
+            } else {
+                for (let [name, body] of bodies) {
+                    body.reset();
+                }
+            }
+        }, false);
 
     let body_num = 1;
-    document.querySelector('#add_body').addEventListener('click', () => {
-        const last_body = selected_body ?? Array.from(bodies.values()).at(-1);
-        const base = last_body.joints[0].getWorldPosition(new THREE.Vector3());
-        const
-            dx = base.x - standard_pose[0][0] * unit(),
-            dy = base.y - standard_pose[0][1] * unit(),
-            dz = base.z - standard_pose[0][2];
-        add_body(`body_${body_num++}`, dx + 32, dy, dz);
-    }, false);
+    if (ui.add_body)
+        ui.add_body.addEventListener('click', () => {
+            const last_body = selected_body ?? Array.from(bodies.values()).at(-1);
+            const base = last_body.joints[0].getWorldPosition(new THREE.Vector3());
+            const
+                dx = base.x - standard_pose[0][0] * unit(),
+                dy = base.y - standard_pose[0][1] * unit(),
+                dz = base.z - standard_pose[0][2];
+            add_body(`body_${body_num++}`, dx + 32, dy, dz);
+        }, false);
 
-    document.querySelector('#remove_body').addEventListener('click', () => {
-        if (!selected_body) {
-            notify('No body is selected.', 'error');
-            return;
-        }
-        if (bodies.size <= 1) {
-            notify('No body is not allowed.', 'error');
-            return;
-        }
-        remove_body(selected_body.name);
-        touched_body = null;
-        selected_body = null;
-    }, false);
+    if (ui.remove_body)
+        ui.remove_body.addEventListener('click', () => {
+            if (!selected_body) {
+                ui.notify('No body is selected.', 'error');
+                return;
+            }
+            if (bodies.size <= 1) {
+                ui.notify('No body is not allowed.', 'error');
+                return;
+            }
+            remove_body(selected_body.name);
+            touched_body = null;
+            selected_body = null;
+        }, false);
 
     const get_client_boundary = body => {
         let [xmin, ymin, xmax, ymax] = get_body_rect(body);
@@ -388,17 +393,19 @@ function init_3d() {
         camera.updateProjectionMatrix();
     };
 
-    const width_input = document.querySelector('#canvas_width'), height_input = document.querySelector('#canvas_height');
-    width_input.addEventListener('change', () => {
-        const w = +width_input.value;
-        const h = +height_input.value;
-        size_change(w, h);
-    }, false);
-    height_input.addEventListener('change', () => {
-        const w = +width_input.value;
-        const h = +height_input.value;
-        size_change(w, h);
-    }, false);
+    const width_input = ui.canvas_width, height_input = ui.canvas_height;
+    if (width_input && height_input) {
+        width_input.addEventListener('change', () => {
+            const w = +width_input.value;
+            const h = +height_input.value;
+            size_change(w, h);
+        }, false);
+        height_input.addEventListener('change', () => {
+            const w = +width_input.value;
+            const h = +height_input.value;
+            size_change(w, h);
+        }, false);
+    }
 
     const animate = () => {
         requestAnimationFrame(animate);
@@ -450,59 +457,37 @@ function init_3d() {
     return animate;
 }
 
-function init() {
-    const save = document.querySelector('#save_button');
-    save.addEventListener('click', () => {
-        const a = document.createElement('a');
-        a.href = document.querySelector('#main_canvas').toDataURL('image/png');
-        a.download = 'download.png';
-        a.click();
-    }, false);
+function init(ui) {
+    if (ui.save)
+        ui.save.addEventListener('click', () => {
+            const a = document.createElement('a');
+            a.href = ui.canvas.toDataURL('image/png');
+            a.download = 'download.png';
+            a.click();
+        }, false);
 
-    const copy = document.querySelector('#copy_button');
-    copy.addEventListener('click', () => {
-        if (globalThis.ClipboardItem === undefined) {
-            alert('`ClipboardItem` is not defined. If you are in Firefox, change about:config -> dom.events.asyncClipboard.clipboardItem to `true`.')
-            return;
-        }
+    if (ui.copy)
+        ui.copy.addEventListener('click', () => {
+            if (globalThis.ClipboardItem === undefined) {
+                alert('`ClipboardItem` is not defined. If you are in Firefox, change about:config -> dom.events.asyncClipboard.clipboardItem to `true`.')
+                return;
+            }
 
-        const canvas = document.querySelector('#main_canvas');
-        try {
-            canvas.toBlob(blob => {
-                try {
-                    const data = new ClipboardItem({ [blob.type]: blob });
-                    navigator.clipboard.write([data]);
-                    notify('success!');
-                } catch (e) {
-                    notify(`failed to copy data: ${e.message}`, 'error');
-                }
-            });
-        } catch (e) {
-            notify(`failed to copy data: ${e.message}`, 'error');
-        }
-    }, false);
+            try {
+                ui.canvas.toBlob(blob => {
+                    try {
+                        const data = new ClipboardItem({ [blob.type]: blob });
+                        navigator.clipboard.write([data]);
+                        ui.notify('success!');
+                    } catch (e) {
+                        ui.notify(`failed to copy data: ${e.message}`, 'error');
+                    }
+                });
+            } catch (e) {
+                ui.notify(`failed to copy data: ${e.message}`, 'error');
+            }
+        }, false);
 }
-
-function notify(str, type) {
-    if (type === undefined) type = 'success';
-
-    const p = document.createElement('p');
-    p.textContent = str;
-    p.classList.add('item', type);
-    const cont = document.querySelector('#notifications');
-    cont.appendChild(p);
-    setTimeout(() => cont.removeChild(p), 3000);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-
-    init();
-
-    const animate = init_3d();
-
-    animate();
-
-}, false);
 
 function array_remove(array, item) {
     let index = array.indexOf(item);
@@ -511,3 +496,5 @@ function array_remove(array, item) {
         index = array.indexOf(item);
     }
 }
+
+export { init, init_3d };
