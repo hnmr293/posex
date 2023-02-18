@@ -133,14 +133,15 @@ function init_3d() {
         notation = document.querySelector('#notation'),
         indicator1 = document.querySelector('#body_indicator1'),
         indicator2 = document.querySelector('#body_indicator2'),
-        width = canvas.width,
-        height = canvas.height,
-        unit = width;
+        width = () => canvas.width,
+        height = () => canvas.height,
+        unit = () => Math.min(width(), height()),
+        unit_max = () => Math.max(width(), height());
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
-    const camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 1, width * 4);
-    camera.position.z = width * 2;
+    const camera = new THREE.OrthographicCamera(width() / -2, width() / 2, height() / 2, height() / -2, 1, width() * 4);
+    camera.position.z = unit_max() * 2;
 
     const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
@@ -148,7 +149,7 @@ function init_3d() {
         alpha: true,
         preserveDrawingBuffer: true,
     });
-    renderer.setSize(width, height);
+    renderer.setSize(width(), height());
 
     const bodies = new Map();
     let selected_body = null;
@@ -168,7 +169,7 @@ function init_3d() {
     };
     const add_body = (name, x0, y0, z0) => {
         remove_body(name);
-        const [joints, limbs] = create_body(unit, x0, y0, z0);
+        const [joints, limbs] = create_body(unit(), x0, y0, z0);
         const group = new THREE.Group(); // for DragControls
 
         const dispose = () => {
@@ -190,7 +191,7 @@ function init_3d() {
             if (dz === undefined) dz = z0;
             for (let i = 0; i < standard_pose.length; ++i) {
                 const [x, y, z] = standard_pose[i];
-                joints[i].position.set(x * unit + dx, y * unit + dy, z + dz);
+                joints[i].position.set(x * unit() + dx, y * unit() + dy, z + dz);
             }
             group.position.set(0, 0, 0);
         };
@@ -253,8 +254,8 @@ function init_3d() {
     const m = new THREE.Vector2();
     renderer.domElement.addEventListener('pointermove', e => {
         e.preventDefault();
-        m.x = ((e.clientX - renderer.domElement.offsetLeft) / width) * 2 - 1;
-        m.y = (-(e.clientY - renderer.domElement.offsetTop) / height) * 2 + 1;
+        m.x = ((e.clientX - renderer.domElement.offsetLeft) / width()) * 2 - 1;
+        m.y = (-(e.clientY - renderer.domElement.offsetTop) / height()) * 2 + 1;
         rc.setFromCamera(m, camera);
         const touched = rc.intersectObjects(touchable_objects);
 
@@ -279,8 +280,8 @@ function init_3d() {
 
     renderer.domElement.addEventListener('pointerdown', e => {
         e.preventDefault();
-        m.x = ((e.clientX - renderer.domElement.offsetLeft) / width) * 2 - 1;
-        m.y = (-(e.clientY - renderer.domElement.offsetTop) / height) * 2 + 1;
+        m.x = ((e.clientX - renderer.domElement.offsetLeft) / width()) * 2 - 1;
+        m.y = (-(e.clientY - renderer.domElement.offsetTop) / height()) * 2 + 1;
         rc.setFromCamera(m, camera);
         const touched = rc.intersectObjects(touchable_objects);
 
@@ -300,7 +301,7 @@ function init_3d() {
     document.querySelector('#all_reset').addEventListener('click', () => {
         touched_body = null;
         selected_body = null;
-        camera.position.set(0, 0, width * 2);
+        camera.position.set(0, 0, unit_max() * 2);
         camera.rotation.set(0, 0, 0);
         controls.reset();
         for (let name of Array.from(bodies.keys()).slice(1)) {
@@ -312,7 +313,7 @@ function init_3d() {
     }, false);
 
     document.querySelector('#reset_camera').addEventListener('click', () => {
-        camera.position.set(0, 0, width * 2);
+        camera.position.set(0, 0, unit_max() * 2);
         camera.rotation.set(0, 0, 0);
         controls.reset();
     }, false);
@@ -332,8 +333,8 @@ function init_3d() {
         const last_body = selected_body ?? Array.from(bodies.values()).at(-1);
         const base = last_body.joints[0].getWorldPosition(new THREE.Vector3());
         const
-            dx = base.x - standard_pose[0][0] * unit,
-            dy = base.y - standard_pose[0][1] * unit,
+            dx = base.x - standard_pose[0][0] * unit(),
+            dy = base.y - standard_pose[0][1] * unit(),
             dz = base.z - standard_pose[0][2];
         add_body(`body_${body_num++}`, dx + 32, dy, dz);
     }, false);
@@ -356,10 +357,10 @@ function init_3d() {
         let [xmin, ymin, xmax, ymax] = get_body_rect(body);
 
         // [-1,1] -> [0,width]
-        xmin = (xmin + 1) * unit / 2;
-        xmax = (xmax + 1) * unit / 2;
-        ymin = unit - (ymin + 1) * unit / 2;
-        ymax = unit - (ymax + 1) * unit / 2;
+        xmin = (xmin + 1) * width() / 2;
+        xmax = (xmax + 1) * width() / 2;
+        ymin = height() - (ymin + 1) * height() / 2;
+        ymax = height() - (ymax + 1) * height() / 2;
         [ymin, ymax] = [ymax, ymin];
 
         // add margin
@@ -370,6 +371,34 @@ function init_3d() {
 
         return [xmin, ymin, xmax, ymax];
     }
+
+    const size_change = (w, h) => {
+        if (w < 64 || h < 64) return;
+        canvas.width = w;
+        canvas.height = h;
+        renderer.setSize(w, h);
+        // update camera
+        camera.left = w / -2;
+        camera.right = w / 2;
+        camera.top = h / 2;
+        camera.bottom = h / -2;
+        camera.near = 1;
+        camera.far = w * 4;
+        camera.position.z = unit_max() * 2;
+        camera.updateProjectionMatrix();
+    };
+
+    const width_input = document.querySelector('#canvas_width'), height_input = document.querySelector('#canvas_height');
+    width_input.addEventListener('change', () => {
+        const w = +width_input.value;
+        const h = +height_input.value;
+        size_change(w, h);
+    }, false);
+    height_input.addEventListener('change', () => {
+        const w = +width_input.value;
+        const h = +height_input.value;
+        size_change(w, h);
+    }, false);
 
     const animate = () => {
         requestAnimationFrame(animate);

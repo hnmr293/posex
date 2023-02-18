@@ -28,15 +28,20 @@
   <div id="cont">
     <button id="all_reset" class="box">&#x1f504; All Reset</button>
     <div style="display: flex; flex-direction: row; gap: 0 0.5em;">
-      <button id="reset_camera" class="box">&#x1f3a5; Reset Camera</button>
-      <button id="reset_pose" class="box">&#x1f9cd; Reset Pose</button>
+      <button id="reset_camera" class="box" style="flex: 1 1 0">&#x1f3a5; Reset Camera</button>
+      <button id="reset_pose" class="box" style="flex: 1 1 0">&#x1f9cd; Reset Pose</button>
     </div>
     <div style="display: flex; flex-direction: row; ">
+
       <canvas width="512" height="512" id="main_canvas"></canvas>
-      <div style="margin-left: 1em; display: flex; flex-direction: column; gap: 0.25em;">
+
+      <div style="margin-left: 1em; display: flex; flex-direction: column; gap: 0.25em; font-size: smaller;">
         <div>- Body</div>
         <button id="add_body" style="width: max-content; min-width: 100%; text-align: left;">&#x2795; Add</button>
         <button id="remove_body" style="width: max-content; min-width: 100%; text-align: left;">&#x2796; Remove</button>
+        <div>- Canvas Size</div>
+        <input type="number" id="canvas_width" value="512" min="64" />
+        <input type="number" id="canvas_height" value="512" min="64" />
       </div>
     </div>
     <div id="body_indicator2"></div>
