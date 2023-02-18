@@ -212,6 +212,7 @@ class DragControls extends EventDispatcher {
 		this.dispose = dispose;
 		this.getObjects = getObjects;
 		this.getRaycaster = getRaycaster;
+		this.onPointerDown = onPointerDown;
 
 	}
 

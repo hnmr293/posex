@@ -26,11 +26,23 @@
 
 <body>
   <div id="cont">
-    <button id="reset_camera" class="box">Reset Camera</button>
-    <button id="reset_pose" class="box">Reset Pose</button>
-    <canvas width="512" height="512" id="main_canvas"></canvas>
-    <a id="save_button" class="box" href="#">Save</a>
-    <a id="copy_button" class="box" href="#">Copy to clipboard</a>
+    <button id="all_reset" class="box">&#x1f504; All Reset</button>
+    <div style="display: flex; flex-direction: row; gap: 0 0.5em;">
+      <button id="reset_camera" class="box">&#x1f3a5; Reset Camera</button>
+      <button id="reset_pose" class="box">&#x1f9cd; Reset Pose</button>
+    </div>
+    <div style="display: flex; flex-direction: row; ">
+      <canvas width="512" height="512" id="main_canvas"></canvas>
+      <div style="margin-left: 1em; display: flex; flex-direction: column; gap: 0.25em;">
+        <div>- Body</div>
+        <button id="add_body" style="width: max-content; min-width: 100%; text-align: left;">&#x2795; Add</button>
+        <button id="remove_body" style="width: max-content; min-width: 100%; text-align: left;">&#x2796; Remove</button>
+      </div>
+    </div>
+    <div id="body_indicator2"></div>
+    <div id="body_indicator1"></div>
+    <a id="save_button" class="box" href="#">&#x1f4be; Save</a>
+    <a id="copy_button" class="box" href="#">&#x1f4cb; Copy to clipboard</a>
   </div>
   <p id="notation"></p>
   <div id="notifications"></div>
