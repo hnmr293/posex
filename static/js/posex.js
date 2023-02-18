@@ -1,7 +1,15 @@
-import * as THREE from 'three';
-import { TrackballControls } from 'three-trackballcontrols';
-import { DragControls } from 'three-dragcontrols';
-import { MeshLine, MeshLineMaterial, MeshLineRaycast } from 'three-meshline';
+async function _import() {
+    if (!globalThis.posex || !globalThis.posex.import) {
+        const THREE = await import('three');
+        const { TrackballControls } = await import('three-trackballcontrols');
+        const { DragControls } = await import('three-dragcontrols');
+        const { MeshLine, MeshLineMaterial } = await import('three-meshline');
+        return { THREE, TrackballControls, DragControls, MeshLine, MeshLineMaterial };
+    } else {
+        return await globalThis.posex.import();
+    }
+}
+const { THREE, TrackballControls, DragControls, MeshLine, MeshLineMaterial } = await _import();
 
 const JOINT_RADIUS = 4.0;
 const LIMB_SIZE = 4.0;

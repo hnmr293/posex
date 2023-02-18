@@ -1,11 +1,18 @@
-import {
+async function _import() {
+	if (!globalThis.posex || !globalThis.posex.import) {
+		return await import('three');
+	} else {
+		return await globalThis.posex.imports.three();
+	}
+}
+const {
 	EventDispatcher,
 	Matrix4,
 	Plane,
 	Raycaster,
 	Vector2,
 	Vector3
-} from 'three';
+} = await _import();
 
 const _plane = new Plane();
 const _raycaster = new Raycaster();
