@@ -7,7 +7,7 @@
     display: flex;
     flex-flow: column;
     width: 512px;
-    gap: 1em 0;
+    gap: 0.5em 0;
 }
 
 .box {
@@ -23,6 +23,7 @@
     display: none;
     position: absolute;
     color: white;
+    pointer-events: none;
 }
 
 #notifications {
@@ -56,4 +57,18 @@
 #notifications .error {
     background-color: #ffcccc;
     color: red;
+}
+
+#body_indicator1 {
+    display: none;
+    position: absolute;
+    outline: 1px solid white;
+    pointer-events: none;
+}
+
+#body_indicator2 {
+    display: none;
+    position: absolute;
+    outline: 1px solid gray;
+    pointer-events: none;
 }
