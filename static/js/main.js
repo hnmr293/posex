@@ -207,13 +207,53 @@ function init_3d() {
 }
 
 function init() {
-    const button = document.querySelector('#save_button');
-    button.addEventListener('click', () => {
+    const save = document.querySelector('#save_button');
+    save.addEventListener('click', () => {
         const a = document.createElement('a');
         a.href = document.querySelector('#main_canvas').toDataURL('image/png');
         a.download = 'download.png';
         a.click();
     }, false);
+
+    const copy = document.querySelector('#copy_button');
+    copy.addEventListener('click', () => {
+        if (globalThis.ClipboardItem === undefined) {
+            alert('`ClipboardItem` is not defined. If you are in Firefox, change about:config -> dom.events.asyncClipboard.clipboardItem to `true`.')
+            return;
+        }
+
+        const canvas = document.querySelector('#main_canvas');
+        try {
+            canvas.toBlob(blob => {
+                try {
+                    const data = new ClipboardItem({ [blob.type]: blob });
+                    navigator.clipboard.write([data]);
+                    notify('success!');
+                } catch (e) {
+                    notify(`failed to copy data: ${e.message}`, 'error');
+                }
+            });
+        } catch (e) {
+            notify(`failed to copy data: ${e.message}`, 'error');
+        }
+    }, false);
+}
+
+function notify(str, type) {
+    if (type === undefined) type = 'success';
+
+    switch (type) {
+        case 'success': console.log(str); break;
+        case 'info': console.info(str); break;
+        case 'error': console.error(str); break;
+    }
+
+    const p = document.createElement('p');
+    p.textContent = str;
+    p.classList.add('item', type);
+    const cont = document.querySelector('#notifications');
+    cont.appendChild(p);
+    setTimeout(() => cont.removeChild(p), 3000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

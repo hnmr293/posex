@@ -24,3 +24,36 @@
     position: absolute;
     color: white;
 }
+
+#notifications {
+    left: 1em;
+    bottom: 0;
+    width: 25%;
+}
+
+#notifications .item {
+    padding: 0.5em;
+    border: 1px solid gray;
+    animation: erase 2s ease-out 0.5s forwards;
+}
+
+@keyframes erase {
+    100% {
+        opacity: 0;
+    }
+}
+
+#notifications .success {
+    background-color: #aaccaa;
+    color: #004000;
+}
+
+#notifications .info {
+    background-color: white;
+    color: black;
+}
+
+#notifications .error {
+    background-color: #ffcccc;
+    color: red;
+}
