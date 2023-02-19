@@ -30,7 +30,6 @@
     }
 
     onUiUpdate(() => {
-        if (posex.called) return;
         const app = gradioApp();
         if (!app || app === document) return;
 
@@ -38,9 +37,33 @@
         const i2i_cont = app.querySelector('#posex-i2i-js')
         if (!t2i_cont || !i2i_cont) return;
 
-        posex.called = true;
-
-        load(t2i_cont);
-        load(i2i_cont);
+        const t2i_enabled = app.querySelector('#posex-t2i-enabled input[type=checkbox]');
+        const i2i_enabled = app.querySelector('#posex-i2i-enabled input[type=checkbox]');
+        
+        const t2i_callback = () => {
+            if (!posex.t2i_called) {
+                posex.t2i_called = true;
+                load(t2i_cont);
+            }
+        };
+        
+        const i2i_callback = () => {
+            if (!posex.i2i_called) {
+                posex.i2i_called = true;
+                load(i2i_cont);
+            }
+        };
+        
+        if (t2i_enabled.checked) {
+            t2i_callback();
+        } else {
+            t2i_enabled.addEventListener('change', t2i_callback, false);
+        }
+        
+        if (i2i_enabled.checked) {
+            i2i_callback();
+        } else {
+            i2i_enabled.addEventListener('change', i2i_callback, false);
+        }
     });
 })();

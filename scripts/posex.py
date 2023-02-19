@@ -27,7 +27,7 @@ class Script(scripts.Script):
         with gr.Accordion('Posex', open=False):
             enabled = gr.Checkbox(value=False, label='Send this image to ControlNet.', elem_id=id('enabled'))
             js = gr.HTML(value='\n'.join(js_), elem_id=id('js'), visible=False)
-            wrapper = gr.HTML(value='Loading...', elem_id=id('html'))
+            wrapper = gr.HTML(value='', elem_id=id('html'))
             apply = gr.Button(value='apply', visible=False, elem_id=id('apply'))
             base64 = gr.Textbox(visible=False, elem_id=id('base64'))
             sink = gr.HTML(value='', visible=False)
