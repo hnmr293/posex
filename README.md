@@ -2,6 +2,18 @@
 
 ![cover](./image/sample.png)
 
+## Quick Start with [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+
+1. Install [Mikubill/sd-webui-controlnet](https://github.com/Mikubill/sd-webui-controlnet).
+2. Install Posex (this).
+3. Open `Posex` accordion in t2i tab (or i2i as you like). Enable `Send this image to ControlNet` checkbox. Editor will be appear.
+4. Configure ControlNet as below.
+```
+Preprocessor: none
+Model: control_sd15_openpose
+```
+5. Generate images.
+
 ## How to use
 
 ```
