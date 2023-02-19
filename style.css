@@ -7,6 +7,10 @@
     flex-flow: column;
     gap: 0.5em 0;
     width: max-content;
+    background-color: white !important;
+    z-index: 20;
+    overflow: auto !important;
+    max-width: 100%;
 }
 
 .posex_reset_cont {
