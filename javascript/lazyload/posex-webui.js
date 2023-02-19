@@ -103,8 +103,10 @@ const { init, init_3d } = await _import();
         // generate button --(1)-> apply button --(2)-> base64 --(3)-> generate button
         
         let actual = false;
+        let data_url = null;
         // (1)
-        button.addEventListener('click', e => {
+        button.addEventListener('click', async e => {
+            data_url = null;
             if (!enabled.checked) return;
             
             if (actual) {
@@ -115,6 +117,7 @@ const { init, init_3d } = await _import();
             // hook `generate` button to add canvas data
             e.preventDefault();
             e.stopPropagation();
+            data_url = await animate.getDataURL();
             gradioApp().querySelector(`#posex-${type}-apply`).click();
         }, true);
         
@@ -122,7 +125,7 @@ const { init, init_3d } = await _import();
         // called from `#posex-{t2i,i2i}-apply` .click
         const apply = enabled => {
             if (!enabled) return '';
-            const url = canvas.toDataURL('image/png');
+            const url = data_url;
             actual = true;
             
             const random = Math.random().toString(32).substring(2);

@@ -161,16 +161,16 @@ function init_3d(ui) {
     });
     renderer.setSize(width(), height());
 
-    function set_bg(image_path) {
+    function set_bg(image_path, dont_dispose) {
         const old_tex = scene.background;
         if (image_path === null) {
             scene.background = default_bg();
-            if (old_tex && old_tex.dispose) old_tex.dispose();
+            if (old_tex && old_tex.dispose && !dont_dispose) old_tex.dispose();
             return;
         }
-        const tex = new THREE.TextureLoader().load(image_path);
+        const tex = image_path.isTexture ? image_path : new THREE.TextureLoader().load(image_path);
         scene.background = tex;
-        if (old_tex && old_tex.dispose) old_tex.dispose();
+        if (old_tex && old_tex.dispose && !dont_dispose) old_tex.dispose();
     }
 
     const bodies = new Map();
@@ -444,6 +444,8 @@ function init_3d(ui) {
     
     if (ui.reset_bg)
         ui.reset_bg.addEventListener('click', () => set_bg(null), false);
+    
+    const onAnimateEndOneshot = [];
 
     const animate = () => {
         requestAnimationFrame(animate);
@@ -490,8 +492,25 @@ function init_3d(ui) {
         }
 
         renderer.render(scene, camera);
+
+        for (let fn of onAnimateEndOneshot) {
+            fn();
+        }
+        onAnimateEndOneshot.length = 0;
     };
 
+    animate.getDataURL = async function() {
+        const pr = new Promise(resolve => {
+            const current_bg = scene.background;
+            set_bg(null, true);
+            onAnimateEndOneshot.push(() => {
+                resolve(renderer.domElement.toDataURL());
+                set_bg(current_bg);
+            });
+        });
+        return await pr;
+    };
+    
     return animate;
 }
 
