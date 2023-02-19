@@ -12,7 +12,8 @@
 Preprocessor: none
 Model: control_sd15_openpose
 ```
-5. Generate images.
+5. Make pose.
+6. Generate images.
 
 ## How to use
 
