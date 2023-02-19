@@ -2,6 +2,51 @@
  * CSS for WebUI
 **/
 
+.posex_cont {
+    display: flex;
+    flex-flow: column;
+    gap: 0.5em 0;
+    width: max-content;
+}
+
+.posex_reset_cont {
+    display: flex;
+    flex-direction: row;
+    gap: 0 0.5em;
+}
+
+.posex_box {
+    display: block;
+    border: 1px solid gray;
+    padding: 0.5em 0;
+    text-decoration: none;
+    text-align: center;
+}
+
+.posex_reset_cont .posex_box {
+    flex: 1 1 0;
+}
+
+.posex_canvas_cont {
+    display: flex;
+    flex-direction: row;
+}
+
+.posex_setting_cont {
+    margin-left: 1em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+}
+
+.posex_body {
+    width: max-content;
+    min-width: 100%;
+    text-align: left;    
+    border: 1px solid gray;
+    padding: 0.5em;
+}
+
 .posex_notation {
     display: none;
     position: absolute;
@@ -24,4 +69,14 @@
     position: absolute;
     outline: 1px solid gray;
     pointer-events: none;
+}
+
+.posex_misc_cont {
+    display: flex;
+    flex-flow: row;
+    gap: 0 0.5em;
+}
+
+.posex_misc {
+    flex: 1 1 0;
 }

@@ -474,6 +474,7 @@ function init(ui) {
             a.href = ui.canvas.toDataURL('image/png');
             a.download = 'download.png';
             a.click();
+            ui.notify('save success');
         }, false);
 
     if (ui.copy)
