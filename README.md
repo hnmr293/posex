@@ -1,5 +1,7 @@
 # Posex - Estimated Image Generator for Pose2Image
 
+![cover](./image/sample.png)
+
 ## How to use
 
 ```
@@ -13,14 +15,9 @@ Wheel:      zoom
 
 ## Installation
 
-### Standalone
-
-```
-$ pip install -r requirements.txt
-$ python app.py
-```
-
-Then open `localhost:55502` or `127.0.0.1:55502` in your browser.
+- With [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+- Online (Github Pages)
+- Standalone
 
 ### With [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
 
@@ -30,11 +27,22 @@ Or move to `extensions` directory and type `git clone https://github.com/hnmr293
 
 In webui, open `Posex` accordion in `txt2img` or `img2img` tab, then click a checkbox. The canvas will be opened.
 
-## Example
+### Online
+
+See Github Pages.
+
+[https://hnmr293.github.io/posex](https://hnmr293.github.io/posex)
 
 ### Standalone
 
-![sample](./image/sample.png)
+```
+$ pip install -r requirements.txt
+$ python app.py
+```
+
+Then open `localhost:55502` or `127.0.0.1:55502` in your browser.
+
+## Example
 
 ### Web UI
 
@@ -43,6 +51,10 @@ In webui, open `Posex` accordion in `txt2img` or `img2img` tab, then click a che
 result:
 
 ![sample result](./image/sample-webui2.jpg)
+
+### Standalone
+
+![sample](./image/sample.png)
 
 ## History
 
