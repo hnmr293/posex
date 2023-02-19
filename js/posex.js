@@ -168,7 +168,7 @@ function init_3d(ui) {
             if (old_tex && old_tex.dispose && !dont_dispose) old_tex.dispose();
             return;
         }
-        const tex = image_path.isTexture ? image_path : new THREE.TextureLoader().load(image_path);
+        const tex = (image_path.isTexture || image_path.isColor) ? image_path : new THREE.TextureLoader().load(image_path);
         scene.background = tex;
         if (old_tex && old_tex.dispose && !dont_dispose) old_tex.dispose();
     }
