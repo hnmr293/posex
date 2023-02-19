@@ -1,0 +1,24 @@
+/*
+ * CSS for WebUI
+**/
+
+.posex_notation {
+    display: none;
+    position: absolute;
+    color: white;
+    pointer-events: none;
+}
+
+.posex_body_indicator1 {
+    display: none;
+    position: absolute;
+    outline: 1px solid white;
+    pointer-events: none;
+}
+
+.posex_body_indicator2 {
+    display: none;
+    position: absolute;
+    outline: 1px solid gray;
+    pointer-events: none;
+}
