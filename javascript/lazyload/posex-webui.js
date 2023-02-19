@@ -117,7 +117,7 @@ const { init, init_3d } = await _import();
             // hook `generate` button to add canvas data
             e.preventDefault();
             e.stopPropagation();
-            data_url = await animate.getDataURL();
+            data_url = await ui.getDataURL();
             gradioApp().querySelector(`#posex-${type}-apply`).click();
         }, true);
         

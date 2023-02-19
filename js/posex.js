@@ -499,13 +499,27 @@ function init_3d(ui) {
         onAnimateEndOneshot.length = 0;
     };
 
-    animate.getDataURL = async function() {
+    ui.getDataURL = async function() {
         const pr = new Promise(resolve => {
             const current_bg = scene.background;
             set_bg(null, true);
             onAnimateEndOneshot.push(() => {
-                resolve(renderer.domElement.toDataURL());
+                resolve(renderer.domElement.toDataURL('image/png'));
                 set_bg(current_bg);
+            });
+        });
+        return await pr;
+    };
+
+    ui.getBlob = async function() {
+        const pr = new Promise(resolve => {
+            const current_bg = scene.background;
+            set_bg(null, true);
+            onAnimateEndOneshot.push(() => {
+                renderer.domElement.toBlob(blob => {
+                    resolve(blob);
+                    set_bg(current_bg);
+                });
             });
         });
         return await pr;
@@ -516,31 +530,37 @@ function init_3d(ui) {
 
 function init(ui) {
     if (ui.save)
-        ui.save.addEventListener('click', () => {
+        ui.save.addEventListener('click', async () => {
             const a = document.createElement('a');
-            a.href = ui.canvas.toDataURL('image/png');
+            if (ui.getDataURL) {
+                a.href = await ui.getDataURL('image/png');
+            } else {
+                a.href = ui.canvas.toDataURL('image/png');
+            }
             a.download = 'download.png';
             a.click();
             ui.notify('save success');
         }, false);
 
     if (ui.copy)
-        ui.copy.addEventListener('click', () => {
+        ui.copy.addEventListener('click', async () => {
             if (globalThis.ClipboardItem === undefined) {
                 alert('`ClipboardItem` is not defined. If you are in Firefox, change about:config -> dom.events.asyncClipboard.clipboardItem to `true`.')
                 return;
             }
 
+            async function get_blob() {
+                if (ui.getBlob) {
+                    return await ui.getBlob();
+                } else {
+                    return await new Promise(resolve => ui.canvas.toBlob(blob => resolve(blob)));
+                }
+            }
             try {
-                ui.canvas.toBlob(blob => {
-                    try {
-                        const data = new ClipboardItem({ [blob.type]: blob });
-                        navigator.clipboard.write([data]);
-                        ui.notify('success!');
-                    } catch (e) {
-                        ui.notify(`failed to copy data: ${e.message}`, 'error');
-                    }
-                });
+                const blob = await get_blob();
+                const data = new ClipboardItem({ [blob.type]: blob });
+                navigator.clipboard.write([data]);
+                ui.notify('copy success');
             } catch (e) {
                 ui.notify(`failed to copy data: ${e.message}`, 'error');
             }
