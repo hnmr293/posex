@@ -5,18 +5,21 @@
 .posex_notation {
     display: none;
     position: absolute;
-    color: white;
+    color: black;
+    background-color: rgba(255, 255, 255, 0.75);
+    padding: 0.1em 0.25em;
     pointer-events: none;
+    font-size: small;
 }
 
-.posex_body_indicator1 {
+.posex_indicator1 {
     display: none;
     position: absolute;
     outline: 1px solid white;
     pointer-events: none;
 }
 
-.posex_body_indicator2 {
+.posex_indicator2 {
     display: none;
     position: absolute;
     outline: 1px solid gray;

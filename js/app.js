@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const { init, init_3d } = await import('posex');
     const ui = {
+        container: document.querySelector('#cont'),
         canvas: document.querySelector('#main_canvas'),
         notation: document.querySelector('#notation'),
         indicator1: document.querySelector('#body_indicator1'),

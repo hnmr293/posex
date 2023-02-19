@@ -4,12 +4,13 @@
 
     function load(cont) {
         const scripts = cont.textContent.trim().split('\n');
-        const base_path = `/file=${scripts.shift()}/static/js`;
+        const base_path = `/file=${scripts.shift()}/js`;
         cont.textContent = '';
 
         const df = document.createDocumentFragment();
         for (let src of scripts) {
             const script = document.createElement('script');
+            script.async = true;
             script.type = 'module';
             script.src = `file=${src}`;
             df.appendChild(script);

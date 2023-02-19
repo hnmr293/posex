@@ -137,6 +137,7 @@ function create_body(unit, x0, y0, z0) {
 
 function init_3d(ui) {
     const
+        container = ui.container,
         canvas = ui.canvas,
         notation = ui.notation,
         indicator1 = ui.indicator1,
@@ -262,16 +263,17 @@ function init_3d(ui) {
     const m = new THREE.Vector2();
     renderer.domElement.addEventListener('pointermove', e => {
         e.preventDefault();
-        m.x = ((e.clientX - renderer.domElement.offsetLeft) / width()) * 2 - 1;
-        m.y = (-(e.clientY - renderer.domElement.offsetTop) / height()) * 2 + 1;
+        m.x = (e.offsetX / width()) * 2 - 1;
+        m.y = (1 - e.offsetY / height()) * 2 - 1;
         rc.setFromCamera(m, camera);
         const touched = rc.intersectObjects(touchable_objects);
 
         // show label
         if (touched.length != 0) {
+            const [dx, dy] = get_relative_offset(renderer.domElement, container);
             notation.textContent = touched[0].object.name;
-            notation.style.left = `${e.clientX}px`;
-            notation.style.top = `${e.clientY}px`;
+            notation.style.left = `${e.offsetX + dx}px`;
+            notation.style.top = `${e.offsetY + dy - 32}px`;
             notation.style.display = 'block';
         } else {
             notation.textContent = '';
@@ -288,8 +290,8 @@ function init_3d(ui) {
 
     renderer.domElement.addEventListener('pointerdown', e => {
         e.preventDefault();
-        m.x = ((e.clientX - renderer.domElement.offsetLeft) / width()) * 2 - 1;
-        m.y = (-(e.clientY - renderer.domElement.offsetTop) / height()) * 2 + 1;
+        m.x = (e.offsetX / width()) * 2 - 1;
+        m.y = (1 - e.offsetY / height()) * 2 - 1;
         rc.setFromCamera(m, camera);
         const touched = rc.intersectObjects(touchable_objects);
 
@@ -503,6 +505,12 @@ function array_remove(array, item) {
         array.splice(index, 1);
         index = array.indexOf(item);
     }
+}
+
+function get_relative_offset(target, origin) {
+    const r0 = origin.getBoundingClientRect();
+    const r1 = target.getBoundingClientRect();
+    return [r1.left - r0.left, r1.top - r0.top];
 }
 
 export { init, init_3d };
