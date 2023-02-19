@@ -15,11 +15,13 @@ Wheel:      zoom
 
 ## Installation
 
-- With [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+- [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) Extension
 - Online (Github Pages)
 - Standalone
 
-### With [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui)
+### [Web UI](https://github.com/AUTOMATIC1111/stable-diffusion-webui) Extension
+
+**Prerequirement: You need to install [Mikubill/sd-webui-controlnet](https://github.com/Mikubill/sd-webui-controlnet) to use Posex with ControlNet Pose2Img.**
 
 Go to `Extensions` tab, then select `Install from URL` tab and input `https://github.com/hnmr293/posex`.
 
