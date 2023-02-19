@@ -41,6 +41,14 @@ const { init, init_3d } = await _import();
         const canvas_marker = $('div'); canvas_marker.textContent = '- Canvas Size';
         const canvas_width = $('input'); canvas_width.type = 'number'; canvas_width.value = 512; canvas_width.min = 64; canvas_width.classList.add('posex_canvas_width', 'posex_canvas_size');
         const canvas_height = $('input'); canvas_height.type = 'number'; canvas_height.value = 512; canvas_height.min = 64; canvas_height.classList.add('posex_canvas_height', 'posex_canvas_size');
+        const bg_marker = $('div'); bg_marker.textContent = '- Background';
+        const set_bg = $('label'); set_bg.classList.add('posex_bg');
+        const bg_button = $('button'); bg_button.innerHTML = '&#x1f5bc; Set'; bg_button.onclick = () => bg_input.click();
+        const bg_input = $('input'); bg_input.type = 'file'; bg_input.style.display = 'none';
+        set_bg.append(bg_button, bg_input);
+        const reset_bg = $('button'); reset_bg.classList.add('posex_bg'); reset_bg.innerHTML = '&#x274c; Del';
+        const bg_cont = $('div'); bg_cont.classList.add('posex_bg_cont');
+        bg_cont.append(set_bg, reset_bg);
         
         const setting_cont = $('div');
         setting_cont.classList.add('posex_setting_cont');
@@ -51,6 +59,8 @@ const { init, init_3d } = await _import();
             canvas_marker,
             canvas_width,
             canvas_height,
+            bg_marker,
+            bg_cont,
         );
 
         const canvas_cont = $('div');
@@ -144,6 +154,8 @@ const { init, init_3d } = await _import();
             remove_body,
             canvas_width,
             canvas_height,
+            bg: bg_input,
+            reset_bg,
             save,
             copy,
             notify: function (str) { console.log(str); }

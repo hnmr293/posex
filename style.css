@@ -51,6 +51,18 @@
     padding: 0.5em;
 }
 
+.posex_bg_cont {
+    display: flex;
+    flex-direction: row;
+    gap: 0 0.25em;
+}
+
+.posex_bg {
+    flex: 0 0 0;
+    border: 1px solid gray;
+    padding: 0.25em 1em;
+}
+
 .posex_notation {
     display: none;
     position: absolute;

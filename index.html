@@ -43,6 +43,11 @@
         <div>- Canvas Size</div>
         <input type="number" id="canvas_width" value="512" min="64" />
         <input type="number" id="canvas_height" value="512" min="64" />
+        <div>- Background</div>
+        <div style="display: flex; flex-direction: row; gap: 0 0.25em;">
+          <label style="flex: 0 0 0;"><button onclick="document.querySelector('#bg_file').click();">&#x1f5bc; Set</button><input type="file" id="bg_file" style="display: none;"/></label>
+          <button id="reset_bg" style="flex: 0 0 0;">&#x274c; Del</button>
+        </div>
       </div>
     </div>
     <div id="body_indicator2"></div>

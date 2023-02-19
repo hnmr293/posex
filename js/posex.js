@@ -148,7 +148,8 @@ function init_3d(ui) {
         unit_max = () => Math.max(width(), height());
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
+    const default_bg = () => new THREE.Color(0x000000);
+    scene.background = default_bg();
     const camera = new THREE.OrthographicCamera(width() / -2, width() / 2, height() / 2, height() / -2, 1, width() * 4);
     camera.position.z = unit_max() * 2;
 
@@ -159,6 +160,18 @@ function init_3d(ui) {
         preserveDrawingBuffer: true,
     });
     renderer.setSize(width(), height());
+
+    function set_bg(image_path) {
+        const old_tex = scene.background;
+        if (image_path === null) {
+            scene.background = default_bg();
+            if (old_tex && old_tex.dispose) old_tex.dispose();
+            return;
+        }
+        const tex = new THREE.TextureLoader().load(image_path);
+        scene.background = tex;
+        if (old_tex && old_tex.dispose) old_tex.dispose();
+    }
 
     const bodies = new Map();
     let selected_body = null;
@@ -416,6 +429,21 @@ function init_3d(ui) {
             size_change(w, h);
         }, false);
     }
+
+    if (ui.bg)
+        ui.bg.addEventListener('change', e => {
+            const files = ui.bg.files;
+            if (files.length != 0) {
+                const file = files[0];
+                const r = new FileReader();
+                r.onload = () => set_bg(r.result);
+                r.readAsDataURL(file);
+            }
+            ui.bg.value = '';
+        }, false);
+    
+    if (ui.reset_bg)
+        ui.reset_bg.addEventListener('click', () => set_bg(null), false);
 
     const animate = () => {
         requestAnimationFrame(animate);

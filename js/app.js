@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         remove_body: document.querySelector('#remove_body'),
         canvas_width: document.querySelector('#canvas_width'),
         canvas_height: document.querySelector('#canvas_height'),
+        bg: document.querySelector('#bg_file'),
+        reset_bg: document.querySelector('#reset_bg'),
         save: document.querySelector('#save_button'),
         copy: document.querySelector('#copy_button'),
         notify: function () {
