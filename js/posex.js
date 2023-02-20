@@ -474,6 +474,7 @@ function init_3d(ui) {
             }
             
             const camera_ = get_pose_dict(camera);
+            camera_.zoom = camera.zoom;
             
             const joints = [];
             for (let [name, body] of bodies) {
@@ -565,6 +566,8 @@ function init_3d(ui) {
         
         // camera
         set_pose_dict(camera, data.camera);
+        camera.zoom = data.camera.zoom;
+        camera.updateProjectionMatrix();
         
         // bodies
         for (let dict of data.joints) {
