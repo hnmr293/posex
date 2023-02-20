@@ -52,8 +52,12 @@
     </div>
     <div id="body_indicator2"></div>
     <div id="body_indicator1"></div>
-    <a id="save_button" class="box" href="#">&#x1f4be; Save</a>
-    <a id="copy_button" class="box" href="#">&#x1f4cb; Copy to clipboard</a>
+    <div style="display: flex; flex-direction: row; gap: 0 0.25em;">
+      <a id="save_button" class="box" style="flex: 1 1 0;" href="#">&#x1f4be; Save Image</a>
+      <a id="copy_button" class="box" style="flex: 1 1 0;" href="#">&#x1f4cb; Copy to clipboard</a>
+    </div>
+    <button id="save_pose" class="box">&#x1f4be;&#x1f9cd; Save Pose</button>
+    <div id="saved_poses"></div>
   </div>
   <p id="notation"></p>
   <div id="notifications"></div>

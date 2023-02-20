@@ -233,6 +233,8 @@ function init_3d(ui) {
         bodies.set(name, body);
         scene.add(group);
         touchable_bodies.push(group);
+
+        return body;
     };
 
     const remove_body = name => {
@@ -445,6 +447,53 @@ function init_3d(ui) {
     if (ui.reset_bg)
         ui.reset_bg.addEventListener('click', () => set_bg(null), false);
     
+    function get_pose_dict(obj3d) {
+        return {
+            position: obj3d.position.toArray(),
+            rotation: obj3d.rotation.toArray(),
+            scale: obj3d.scale.toArray(),
+            up: obj3d.up.toArray(),
+        };
+    }
+
+    function set_pose_dict(obj3d, dict) {
+        obj3d.position.set(...dict.position);
+        obj3d.rotation.set(...dict.rotation);
+        obj3d.scale.set(...dict.scale);
+        obj3d.up.set(...dict.up);
+    }
+
+    if (ui.save_pose && ui.save_pose_callback)
+        ui.save_pose.addEventListener('click', async () => {
+            const name = prompt('Input pose name.');
+            if (name === undefined || name === null || name === '') return;
+
+            const screen = {
+                width: width(),
+                height: height(),
+            }
+            
+            const camera_ = get_pose_dict(camera);
+            
+            const joints = [];
+            for (let [name, body] of bodies) {
+                joints.push({
+                    name,
+                    joints: body.joints.map(j => get_pose_dict(j)),
+                    group: get_pose_dict(body.group),
+                    x0: body.x0,
+                    y0: body.y0,
+                    z0: body.z0,
+                });
+            }
+            
+            const image = await ui.getDataURL();
+            
+            const data = { name, image, screen, camera: camera_, joints };
+            const result = await ui.save_pose_callback(data);
+            ui.notify(result.result, result.ok ? 'success' : 'error');
+        }, false);
+    
     const onAnimateEndOneshot = [];
 
     const animate = () => {
@@ -497,6 +546,34 @@ function init_3d(ui) {
             fn();
         }
         onAnimateEndOneshot.length = 0;
+    };
+
+    ui.loadPose = function(data) {
+        selected_body = null;
+        touched_body = null;
+        touchable_objects.length = 0;
+        touchable_bodies.length = 0;
+        object_to_body.clear();
+        for (let name of bodies.keys()) {
+            remove_body(name);
+        }
+
+        // screen
+        size_change(data.screen.width, data.screen.height);
+        if (width_input) width_input.value = data.screen.width;
+        if (height_input) height_input.value = data.screen.height;
+        
+        // camera
+        set_pose_dict(camera, data.camera);
+        
+        // bodies
+        for (let dict of data.joints) {
+            const body = add_body(dict.name, dict.x0, dict.y0, dict.z0);
+            for (let i = 0, e = Math.min(body.joints.length, dict.joints.length); i < e; ++i) {
+                set_pose_dict(body.joints[i], dict.joints[i]);
+            }
+            set_pose_dict(body.group, dict.group);
+        }
     };
 
     ui.getDataURL = async function() {
