@@ -147,7 +147,11 @@ function init_3d(ui) {
         height = () => canvas.height,
         unit = () => Math.min(width(), height()),
         unit_max = () => Math.max(width(), height());
-
+    
+    canvas.addEventListener('contextmenu', e => {
+        e.preventDefault();
+    }, false);
+    
     const scene = new THREE.Scene();
     const default_bg = () => new THREE.Color(0x000000);
     scene.background = default_bg();
