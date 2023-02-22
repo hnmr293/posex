@@ -120,6 +120,7 @@ function create_body(unit, x0, y0, z0) {
         joint.position.x = x * unit + x0;
         joint.position.y = y * unit + y0;
         joint.position.z = z + z0;
+        joint.dirty = true; // update limbs in next frame
         joints.push(joint);
     }
 
@@ -214,11 +215,23 @@ function init_3d(ui) {
             for (let i = 0; i < standard_pose.length; ++i) {
                 const [x, y, z] = standard_pose[i];
                 joints[i].position.set(x * unit() + dx, y * unit() + dy, z + dz);
+                joints[i].dirty = true;
             }
             group.position.set(0, 0, 0);
+            body.dirty = true;
         };
 
-        const body = { name, group, joints, limbs, x0, y0, z0, dispose, reset };
+        const body = {
+            name,
+            group,
+            joints,
+            limbs,
+            x0, y0, z0,
+            dispose,
+            reset,
+            dirty: true, // update limbs in next frame
+        };
+
         for (let joint of joints) {
             touchable_objects.push(joint);
             object_to_body.set(joint, body);
@@ -266,8 +279,20 @@ function init_3d(ui) {
 
     dragger_joint.addEventListener('dragstart', () => { controls.enabled = false; });
     dragger_joint.addEventListener('dragend', () => { controls.enabled = true; });
+    dragger_joint.addEventListener('drag', e => {
+        e.object.dirty = true;
+        object_to_body.get(e.object).dirty = true;
+    });
+    
     dragger_body.addEventListener('dragstart', () => { controls.enabled = false; });
     dragger_body.addEventListener('dragend', () => { controls.enabled = true; });
+    dragger_body.addEventListener('drag', e => {
+        const body = object_to_body.get(e.object);
+        body.dirty = true;
+        for (let i = 0; i < body.joints.length; ++i) {
+            body.joints[i].dirty = true;
+        }
+    });
 
     renderer.domElement.addEventListener('pointerdown', e => {
         dragger_joint.enabled = e.button === 0;
@@ -497,24 +522,39 @@ function init_3d(ui) {
     
     const onAnimateEndOneshot = [];
 
+    let last_zoom = camera.zoom;
     const animate = () => {
         requestAnimationFrame(animate);
         controls.update();
 
         for (let [name, body] of bodies) {
             const { joints, limbs, group } = body;
+            
             // update joint size
             for (let joint of joints) {
                 joint.scale.setScalar(1 / camera.zoom);
             }
+            
             // show limbs
-            const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
-            for (let i = 0; i < limb_pairs.length; ++i) {
-                const [from_index, to_index] = limb_pairs[i];
-                const [from, to] = [joints[from_index], joints[to_index]];
-                limbs[i].geometry.setPoints([from.getWorldPosition(v1), to.getWorldPosition(v2)], p => LIMB_SIZE / camera.zoom);
+            const zoom_changed = last_zoom !== camera.zoom;
+            if (body.dirty || zoom_changed) {
+                const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
+                for (let i = 0; i < limb_pairs.length; ++i) {
+                    const [from_index, to_index] = limb_pairs[i];
+                    const [from, to] = [joints[from_index], joints[to_index]];
+                    if (from.dirty || to.dirty || zoom_changed) {
+                        limbs[i].geometry.setPoints([from.getWorldPosition(v1), to.getWorldPosition(v2)], p => LIMB_SIZE / camera.zoom);
+                    }
+                }
+                
+                for (let i = 0; i < joints.length; ++i) {
+                    joints[i].dirty = false;
+                }
+                body.dirty = false;
             }
         }
+
+        last_zoom = camera.zoom;
 
         // show selection
         if (touched_body) {
