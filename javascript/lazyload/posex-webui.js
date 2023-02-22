@@ -117,6 +117,10 @@ const { init, init_3d } = await _import();
         canvas.width = 512;
         canvas.height = 512;
         
+        const camera_marker = $('div'); camera_marker.textContent = '- Camera';
+        const fixed_roll_label = $('label');
+        const fixed_roll = $('input'); fixed_roll.type = 'checkbox'; fixed_roll.classList.add('posex_fixed_roll', 'posex_camera'); 
+        fixed_roll_label.append(fixed_roll, document.createTextNode('Fixed Roll'));
         const body_marker = $('div'); body_marker.textContent = '- Body';
         const add_body = $('button'); add_body.classList.add('posex_add_body', 'posex_body'); add_body.innerHTML = '&#x2795; Add';
         const remove_body = $('button'); remove_body.classList.add('posex_remove_body', 'posex_body'); remove_body.innerHTML = '&#x2796; Remove';
@@ -135,6 +139,8 @@ const { init, init_3d } = await _import();
         const setting_cont = $('div');
         setting_cont.classList.add('posex_setting_cont');
         setting_cont.append(
+            camera_marker,
+            fixed_roll_label,
             body_marker,
             add_body,
             remove_body,
@@ -222,6 +228,7 @@ const { init, init_3d } = await _import();
             all_reset,
             reset_camera,
             reset_pose,
+            fixed_roll,
             add_body,
             remove_body,
             canvas_width,

@@ -152,6 +152,7 @@ function init_3d(ui) {
     const default_bg = () => new THREE.Color(0x000000);
     scene.background = default_bg();
     const camera = new THREE.OrthographicCamera(width() / -2, width() / 2, height() / 2, height() / -2, 1, width() * 4);
+    camera.fixed_roll = ui.fixed_roll ? !!ui.fixed_roll.checked : false;
     camera.position.z = unit_max() * 2;
 
     const renderer = new THREE.WebGLRenderer({
@@ -381,6 +382,11 @@ function init_3d(ui) {
             }
         }, false);
 
+    if (ui.fixed_roll)
+        ui.fixed_roll.addEventListener('change', () => {
+            camera.fixed_roll = !!ui.fixed_roll.checked;
+        }, false);
+    
     let body_num = 1;
     if (ui.add_body)
         ui.add_body.addEventListener('click', () => {
@@ -581,6 +587,7 @@ function init_3d(ui) {
             indicator1.style.display = 'none';
         }
 
+        if (camera.fixed_roll) camera.up.set(0, 1, 0);
         renderer.render(scene, camera);
 
         for (let fn of onAnimateEndOneshot) {

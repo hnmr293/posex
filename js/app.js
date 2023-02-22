@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         all_reset: document.querySelector('#all_reset'),
         reset_camera: document.querySelector('#reset_camera'),
         reset_pose: document.querySelector('#reset_pose'),
+        fixed_roll: document.querySelector('#fixed_roll'),
         add_body: document.querySelector('#add_body'),
         remove_body: document.querySelector('#remove_body'),
         canvas_width: document.querySelector('#canvas_width'),
