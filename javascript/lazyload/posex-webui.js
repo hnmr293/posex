@@ -276,8 +276,11 @@ const { init, init_3d } = await _import();
         {
             // Send canvas image to ControlNet when button is clicked.
             let force = false;
-            generate_button.addEventListener('click', async e => {
+            gradioApp().addEventListener('click', async e => {
+                if (e.target !== generate_button) return;
+                
                 if (!enabled.checked) return;
+                
                 if (force) {
                     force = false;
                     return;
