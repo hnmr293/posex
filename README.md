@@ -73,6 +73,11 @@ result:
 
 ## History
 
+### v0.3 -> v0.4 features
+- background setting
+- save/load pose
+- fixed camera roll
+
 ### v0.2 -> v0.3 features
 - Web UI extension
 
