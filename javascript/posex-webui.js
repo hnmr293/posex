@@ -24,8 +24,8 @@
             return { THREE, TrackballControls, DragControls, MeshLine, MeshLineMaterial };
         };
         if (!globalThis.posex.imports) globalThis.posex.imports = {};
-        globalThis.posex.imports.three = async () => await import(`${base_path}/three.module.js`);
-        globalThis.posex.imports.posex = async () => await import(`${base_path}/posex.js`);
+        if (!globalThis.posex.imports.three) globalThis.posex.imports.three = async () => await import(`${base_path}/three.module.js`);
+        if (!globalThis.posex.imports.posex) globalThis.posex.imports.posex = async () => await import(`${base_path}/posex.js`);
         cont.appendChild(df);
     }
 
@@ -48,9 +48,9 @@
         };
         
         const i2i_callback = () => {
-            if (!posex.i2i_called) {
-                posex.i2i_called = true;
-                load(i2i_cont);
+            if (!posex.t2i_called) {
+                posex.t2i_called = true;
+                load(t2i_called);
             }
         };
         

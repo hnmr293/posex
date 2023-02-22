@@ -447,6 +447,7 @@ function init_3d(ui) {
         camera.far = w * 4;
         camera.position.z = unit_max() * 2;
         camera.updateProjectionMatrix();
+        controls.handleResize();
     };
 
     const width_input = ui.canvas_width, height_input = ui.canvas_height;
@@ -529,8 +530,16 @@ function init_3d(ui) {
     const onAnimateEndOneshot = [];
 
     let last_zoom = camera.zoom;
+    let running = true;
     const animate = () => {
         requestAnimationFrame(animate);
+        if (!running) return;
+
+        if (controls.enabled) {
+            if (controls.screen.width === 0 && controls.screen.height === 0) {
+                controls.handleResize();
+            }
+        }
         controls.update();
 
         for (let [name, body] of bodies) {
@@ -650,6 +659,25 @@ function init_3d(ui) {
             });
         });
         return await pr;
+    };
+
+    ui.stop = function() {
+        running = false;
+        dragger_joint.deactivate();
+        dragger_joint.enabled = false;
+        dragger_body.deactivate();
+        dragger_body.enabled = false;
+        controls.enabled = false;
+    };
+
+    ui.play = function() {
+        running = true;
+        dragger_joint.activate();
+        dragger_joint.enabled = true;
+        dragger_body.activate();
+        dragger_body.enabled = true;
+        controls.enabled = true;
+        controls.handleResize();
     };
     
     return animate;

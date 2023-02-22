@@ -305,6 +305,25 @@ const { init, init_3d } = await _import();
         const animate = init_3d(ui);
         
         animate();
+
+        onUiTabChange(() => {
+            const tabname = get_uiCurrentTabContent().id;
+            if (type === 't2i') {
+                if (0 <= tabname.indexOf('txt2img')) {
+                    ui.play();
+                } else {
+                    ui.stop();
+                }
+            } else if (type === 'i2i') {
+                if (0 <= tabname.indexOf('img2img')) {
+                    ui.play();
+                } else {
+                    ui.stop();
+                }
+            } else {
+                ui.stop();
+            }
+        });
     }
 
     const app = gradioApp();
