@@ -162,7 +162,7 @@ const { init, init_3d } = await _import();
         indicator2.classList.add('posex_indicator2');
 
         const copy = $('button'); copy.classList.add('posex_copy', 'posex_misc', 'posex_box'); copy.innerHTML = '&#x1f4cb; Copy to clipboard';
-        const save = $('button'); save.classList.add('posex_save', 'posex_misc', 'posex_box'); save.innerHTML = '&#x1f4be; Save';
+        const save = $('button'); save.classList.add('posex_save', 'posex_misc', 'posex_box'); save.innerHTML = '&#x1f4be; Download image';
         
         const misc_cont = $('div');
         misc_cont.classList.add('posex_misc_cont');
