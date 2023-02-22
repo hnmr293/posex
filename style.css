@@ -96,3 +96,57 @@
 .posex_misc {
     flex: 1 1 0;
 }
+
+.posex_saved_poses {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25em;
+    font-size: small;
+}
+
+.posex_saved_poses > * {
+    margin: 0;
+    outline: 1px solid gray;
+    max-width: 128px;
+}
+
+.posex_saved_poses img {
+    max-width: 128px;
+    max-height: 128px;
+}
+
+.posex_saved_poses figcaption {
+    padding: 0 0.25em;
+    overflow-wrap: anywhere; /* Opera Android may not be able to interpret `anywhere` keyword. */
+}
+
+.posex_saved_poses .close {
+    position: absolute;
+    cursor: pointer;
+    background-color: white;
+    opacity: 0.5 !important;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    vertical-align: middle;
+    margin: 0;
+    padding: 0;
+    font-family: monospace;
+}
+
+.posex_saved_poses .close:hover {
+    opacity: 1.0 !important;
+}
+
+.posex_saved_poses .close2 {
+    display: none;
+    position: absolute;
+    left: 1.5em;
+    top: 0;
+}
+
+.posex_saved_poses .close:hover .close2 {
+    display: block;
+    color: white;
+    pointer-events: none;
+}

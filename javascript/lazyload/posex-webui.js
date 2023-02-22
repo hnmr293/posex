@@ -9,12 +9,94 @@ async function _import() {
 }
 const { init, init_3d } = await _import();
 
-(function () {
-    function init_canvas(type, enabled, container, button) {
+(async function () {
+    let _r = 0;
+    function to_gradio(v) {
+        // force call `change` event on gradio
+        return [v, _r++];
+    }
+    
+    function js2py(type, gradio_field, value) {
+        // set `value` to gradio's field
+        // (1) Click gradio's button.
+        // (2) Gradio will fire js callback to retrieve value to be set.
+        // (3) Gradio will fire another js callback to notify the process has been completed.
+        return new Promise(resolve => {
+            const callback_name = `posex-${type}-${gradio_field}`;
+            
+            // (2)
+            globalThis[callback_name] = () => {
+                
+                delete globalThis[callback_name];
+                
+                // (3)
+                const callback_after = callback_name + '_after';
+                globalThis[callback_after] = () => {
+                    delete globalThis[callback_after];
+                    resolve();
+                };
+                
+                return to_gradio(value);
+            };
+            
+            // (1)
+            gradioApp().querySelector(`#${callback_name}_set`).click();
+        });
+    }
+
+    function py2js(type, pyname, ...args) {
+        // call python's function
+        // (1) Set args to gradio's field
+        // (2) Click gradio's button
+        // (3) JS callback will be kicked with return value from gradio
+        
+        // (1)
+        return (args.length == 0 ? Promise.resolve() : js2py(type, pyname + '_args', JSON.stringify(args)))
+        .then(() => {
+            return new Promise(resolve => {
+                const callback_name = `posex-${type}-${pyname}`;
+                // (3)
+                globalThis[callback_name] = value => {
+                    delete globalThis[callback_name];
+                    resolve(value);
+                }
+                // (2)
+                gradioApp().querySelector(`#${callback_name}_get`).click();
+            });
+        });
+    }
+
+    function reload_poses(json, ui) {
+        const df = document.createDocumentFragment();
+        for (let data of json) {
+            const fig = document.createElement('figure')
+            const img = document.createElement('img');
+            const cap = document.createElement('figcaption');
+            const clo = document.createElement('div');
+            const cloimg = document.createElement('img');
+            const clo2 = document.createElement('span');
+            fig.dataset.poseName = data.name;
+            cap.textContent = data.name;
+            clo.classList.add('close');
+            cloimg.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAAsSAAALEgHS3X78AAAAG3RFWHRTb2Z0d2FyZQBDZWxzeXMgU3R1ZGlvIFRvb2zBp+F8AAAAxElEQVQ4y82T0REBQRBEX0dAJk4GJwKXgZMBESADIiADJwKXATI4GRBB+1lqKa62+DFV+7E7U6+6e2plm19K/wWQ1AE2QBcobZ9fehVwCb3rWwWShmHwaLsfvW+BAihs71otSJoBc2BuexFBl7anSRlI2gN5OBXQxIpSAB2gCXlcgCzOJGkLkg5ABhyB/B5cqoI1UAb5BbCxPU4CSBqFdda2B1GoE9urVoCkHlCH68N3ZOfzGkNw9dvBZ3Bu+/SHf+GbugG9/4ThhKqF8gAAAABJRU5ErkJggg==';
+            clo2.classList.add('close2');
+            clo2.textContent = 'delete';
+            clo.append(cloimg, clo2);
+            
+            img.src = 'data:image/png;base64,' + data.image;
+            img.title = data.name;
+            fig.append(clo, img, cap);
+            
+            df.appendChild(fig);
+        }
+        
+        ui.saved_poses.innerHTML = '';
+        ui.saved_poses.appendChild(df);
+    }
+    
+    function init_ui(type, api) {
         const $ = x => document.createElement(x);
         
-        container.classList.add('posex_cont');
-
         const all_reset = $('button');
         all_reset.innerHTML = '&#x1f504; All Reset';
         all_reset.classList.add('posex_all_reset', 'posex_box');
@@ -89,63 +171,50 @@ const { init, init_3d } = await _import();
             save
         );
 
-        container.innerHTML = '';
-        container.append(
-            all_reset,
-            reset_cont,
-            canvas_cont,
-            indicator2,
-            indicator1,
-            notation,
-            misc_cont,
-        )
-        
-        // generate button --(1)-> apply button --(2)-> base64 --(3)-> generate button
-        
-        let actual = false;
-        let data_url = null;
-        // (1)
-        button.addEventListener('click', async e => {
-            data_url = null;
-            if (!enabled.checked) return;
-            
-            if (actual) {
-                actual = false;
-                return;
-            }
-            
-            // hook `generate` button to add canvas data
-            e.preventDefault();
-            e.stopPropagation();
-            data_url = await ui.getDataURL();
-            gradioApp().querySelector(`#posex-${type}-apply`).click();
-        }, true);
-        
-        // (2)
-        // called from `#posex-{t2i,i2i}-apply` .click
-        const apply = enabled => {
-            if (!enabled) return '';
-            const url = data_url;
-            actual = true;
-            
-            const random = Math.random().toString(32).substring(2);
-            // goes to sink
-            
-            return [url, random];
-        };
+        const save_pose = $('button');
+        save_pose.classList.add('posex_save_pose', 'posex_box');
+        save_pose.innerHTML = '&#x1f4be;&#x1f9cd; Save Pose';
 
-        // (3)
-        // called from `#posex-{t2i,i2i}-sink`
-        const generate = enabled => {
-            actual = true;
-            button.click();
+        const save_pose_callback = async obj => {
+            await py2js(type, 'savepose', obj);
+            const json = await py2js(type, 'allposes')
+            reload_poses(JSON.parse(json), ui);
+            return { result: '', ok: true };
         };
         
-        globalThis[`posex_${type}_apply`] = apply;
-        globalThis[`posex_${type}_generate`] = generate;
-        
+        const saved_poses = $('div');
+        saved_poses.classList.add('posex_saved_poses');
+
+        saved_poses.addEventListener('click', async e => {
+            const get_name = ele => {
+                while (ele && ele !== document) {
+                    if (ele.dataset && ele.dataset.poseName !== undefined)
+                        return ele.dataset.poseName;
+                    ele = ele.parentNode;
+                }
+                return '';
+            };
+            
+            let target = e.target;
+            if (target.tagName === 'IMG') target = target.parentNode;
+            if (target.classList.contains('close2')) target = target.parentNode;
+            if (target.tagName === 'FIGURE') {
+                const name = get_name(target);
+                if (name.length != 0) {
+                    const json = await py2js(type, 'loadpose', name);
+                    ui.loadPose(JSON.parse(json));
+                }
+            } else if (target.classList.contains('close')) {
+                const name = get_name(target);
+                if (name.length != 0) {
+                    await py2js(type, 'delpose', name);
+                    const json = await py2js(type, 'allposes')
+                    reload_poses(JSON.parse(json), ui);
+                }
+            }
+        }, false);
+
         const ui = {
-            container,
             canvas,
             notation,
             indicator1,
@@ -161,8 +230,68 @@ const { init, init_3d } = await _import();
             reset_bg,
             save,
             copy,
-            notify: function (str) { console.log(str); }
+            save_pose,
+            save_pose_callback,
+            saved_poses,
         };
+        
+        const df = document.createDocumentFragment();
+        df.append(
+            all_reset,
+            reset_cont,
+            canvas_cont,
+            indicator2,
+            indicator1,
+            notation,
+            misc_cont,
+            save_pose,
+            saved_poses,
+        );
+        
+        return { ui, df };
+    };
+
+    async function init_canvas(
+        type,
+        enabled,
+        generate_button,
+        container,
+        api
+    ) {
+        container.classList.add('posex_cont');
+        container.innerHTML = '';
+        const { ui, df } = init_ui(type, api);
+        container.appendChild(df);
+
+        ui.container = container;
+        ui.notify = function (str, type) { if (type === 'error') console.error(str); };
+        
+        {
+            // Send canvas image to ControlNet when button is clicked.
+            let force = false;
+            generate_button.addEventListener('click', async e => {
+                if (!enabled.checked) return;
+                if (force) {
+                    force = false;
+                    return;
+                }
+                
+                // hook `generate` button to add canvas data
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const data_url = await ui.getDataURL();
+                await js2py(type, 'base64', data_url);
+                force = true;
+                generate_button.click();
+            }, true);
+        }
+        
+        {
+            // Load saved poses.
+            const json = await py2js(type, 'allposes')
+            reload_poses(JSON.parse(json), ui);
+        }
         
         init(ui);
         
@@ -172,16 +301,24 @@ const { init, init_3d } = await _import();
     }
 
     const app = gradioApp();
-    init_canvas(
+    await init_canvas(
         't2i',
         app.querySelector('#posex-t2i-enabled input[type=checkbox]'),
+        app.querySelector('#txt2img_generate'),
         app.querySelector('#posex-t2i-html'),
-        app.querySelector('#txt2img_generate')
+        {
+            load_all_poses: app.querySelector('#posex-t2i-api-all_pose'),
+            delete_pose: app.querySelector('#posex-t2i-api-delete_pose'),
+        }
     );
-    init_canvas(
+    await init_canvas(
         'i2i',
         app.querySelector('#posex-i2i-enabled input[type=checkbox]'),
+        app.querySelector('#img2img_generate'),
         app.querySelector('#posex-i2i-html'),
-        app.querySelector('#img2img_generate')
+        {
+            load_all_poses: app.querySelector('#posex-i2i-api-all_pose'),
+            delete_pose: app.querySelector('#posex-i2i-api-delete_pose'),
+        }
     );
 })();
