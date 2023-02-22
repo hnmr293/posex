@@ -7,8 +7,6 @@
     flex-flow: column;
     gap: 0.5em 0;
     width: max-content;
-    background-color: white !important;
-    z-index: 20;
     overflow: auto !important;
     max-width: 100%;
 }
@@ -34,6 +32,10 @@
 .posex_canvas_cont {
     display: flex;
     flex-direction: row;
+}
+
+.posex_canvas_size {
+    background-color: transparent;
 }
 
 .posex_setting_cont {
