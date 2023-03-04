@@ -630,6 +630,18 @@ function init_3d(ui) {
         camera.updateProjectionMatrix();
         
         // bodies
+        
+        // update `body_num`
+        const body_names = data.joints.map(x => {
+            const m = /^body_(\d+)$/.exec(x.name);
+            return m ? +m[1] : -1;
+        }).filter(x => 0 <= x);
+        if (body_names.length == 0) {
+            body_num = 0;
+        } else {
+            body_num = Math.max(...body_names) + 1;
+        }
+
         for (let dict of data.joints) {
             const body = add_body(dict.name, dict.x0, dict.y0, dict.z0);
             for (let i = 0, e = Math.min(body.joints.length, dict.joints.length); i < e; ++i) {
