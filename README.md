@@ -61,11 +61,21 @@ Then open `localhost:55502` or `127.0.0.1:55502` in your browser.
 
 ### Web UI
 
+sample 1:
+
 ![sample](./image/sample-webui.png)
 
 result:
 
 ![sample result](./image/sample-webui2.jpg)
+
+sample 2:
+
+![sample 2](./saved_poses/bridge.png)
+
+result:
+
+![sample 2 result](./image/sample-webui3.png)
 
 ### Standalone
 
