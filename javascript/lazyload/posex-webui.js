@@ -135,6 +135,10 @@ const { init, init_3d } = await _import();
         const reset_bg = $('button'); reset_bg.classList.add('posex_bg'); reset_bg.innerHTML = '&#x274c; Del';
         const bg_cont = $('div'); bg_cont.classList.add('posex_bg_cont');
         bg_cont.append(set_bg, reset_bg);
+        const joint_marker = $('div'); joint_marker.textContent = '- Joints and Limbs';
+        const elliptic_limbs_label = $('label');
+        const elliptic_limbs = $('input'); elliptic_limbs.type = 'checkbox'; elliptic_limbs.classList.add('posex_joints', 'posex_elliptic_limbs'); elliptic_limbs.checked = true;
+        elliptic_limbs_label.append(elliptic_limbs, document.createTextNode('Elliptic Limbs'));
         
         const setting_cont = $('div');
         setting_cont.classList.add('posex_setting_cont');

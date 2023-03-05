@@ -534,13 +534,26 @@ function init_3d(ui) {
     const onAnimateEndOneshot = [];
 
     // limb update
-    let elliptic_limbs = true;
+    let elliptic_limbs = ui.elliptic_limbs ? !!ui.elliptic_limbs.checked : true;
+    if (ui.elliptic_limbs)
+        ui.elliptic_limbs.addEventListener('change', () => {
+            const b = !!ui.elliptic_limbs.checked;
+            if (elliptic_limbs !== b) {
+                elliptic_limbs = b;
+                for (let body of bodies.values()) {
+                    body.dirty = true;
+                    for (let i = 0; i < body.joints.length; ++i) {
+                        body.joints[i].dirty = true;
+                    }
+                }
+            }
+        }, false);
     const limb_vecs = Array.from(Array(LIMB_N)).map(x => new THREE.Vector3());
     function elliptic_limb_width(p) {
         // draw limb ellipse
         //   x^2 / a^2 + y^2 / b^2 = 1
         //     a := half of distance between two joints
-        //     b := LIMB_SIZE / camera.zoom
+        //     b := 2 * LIMB_SIZE / camera.zoom
         //   {a(2p-1)}^2 / a^2 + y^2 / b^2 = 1
         //   y^2 = b^2 { 1 - (2p-1)^2 }
         const b = 2 * LIMB_SIZE / camera.zoom;
@@ -548,7 +561,8 @@ function init_3d(ui) {
         return b * Math.sqrt(1 - pp * pp);
     }
     function stick_limb_width(p) {
-        return 2 * LIMB_SIZE / camera.zoom;
+        // half width of ellipse
+        return LIMB_SIZE / camera.zoom;
     }
     function create_limb(mesh, from, to) {
         const s0 = limb_vecs[0];
