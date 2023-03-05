@@ -533,8 +533,10 @@ function init_3d(ui) {
 
     const onAnimateEndOneshot = [];
 
-    // limb update
+    // joint and limb update
     let elliptic_limbs = ui.elliptic_limbs ? !!ui.elliptic_limbs.checked : true;
+    //let joint_size_m = ui.joint_radius ? +ui.joint_radius.value / JOINT_RADIUS : 1.0;
+    let limb_size_m = ui.limb_width ? +ui.limb_width.value / LIMB_SIZE : 1.0;
     if (ui.elliptic_limbs)
         ui.elliptic_limbs.addEventListener('change', () => {
             const b = !!ui.elliptic_limbs.checked;
@@ -548,6 +550,35 @@ function init_3d(ui) {
                 }
             }
         }, false);
+
+    //if (ui.joint_radius)
+    //    ui.joint_radius.addEventListener('input', () => {
+    //        const new_val = +ui.joint_radius.value / JOINT_RADIUS;
+    //        if (joint_size_m !== new_val) {
+    //            joint_size_m = new_val;
+    //            for (let body of bodies.values()) {
+    //                body.dirty = true;
+    //                for (let i = 0; i < body.joints.length; ++i) {
+    //                    body.joints[i].dirty = true;
+    //                }
+    //            }
+    //        }
+    //    }, false);
+
+    if (ui.limb_width)
+        ui.limb_width.addEventListener('input', () => {
+            const new_val = +ui.limb_width.value / LIMB_SIZE;
+            if (limb_size_m !== new_val) {
+                limb_size_m = new_val;
+                for (let body of bodies.values()) {
+                    body.dirty = true;
+                    for (let i = 0; i < body.joints.length; ++i) {
+                        body.joints[i].dirty = true;
+                    }
+                }
+            }
+        }, false);
+
     const limb_vecs = Array.from(Array(LIMB_N)).map(x => new THREE.Vector3());
     function elliptic_limb_width(p) {
         // draw limb ellipse
@@ -556,13 +587,13 @@ function init_3d(ui) {
         //     b := 2 * LIMB_SIZE / camera.zoom
         //   {a(2p-1)}^2 / a^2 + y^2 / b^2 = 1
         //   y^2 = b^2 { 1 - (2p-1)^2 }
-        const b = 2 * LIMB_SIZE / camera.zoom;
+        const b = 2 * LIMB_SIZE * limb_size_m / camera.zoom;
         const pp = 2 * p - 1;
         return b * Math.sqrt(1 - pp * pp);
     }
     function stick_limb_width(p) {
         // half width of ellipse
-        return LIMB_SIZE / camera.zoom;
+        return LIMB_SIZE * limb_size_m / camera.zoom;
     }
     function create_limb(mesh, from, to) {
         const s0 = limb_vecs[0];

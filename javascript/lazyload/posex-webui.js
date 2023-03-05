@@ -136,6 +136,9 @@ const { init, init_3d } = await _import();
         const bg_cont = $('div'); bg_cont.classList.add('posex_bg_cont');
         bg_cont.append(set_bg, reset_bg);
         const joint_marker = $('div'); joint_marker.textContent = '- Joints and Limbs';
+        const limb_width_label = $('label');
+        const limb_width = $('input'); limb_width.type = 'range'; limb_width.min = 1; limb_width.max = 16; limb_width.value = 4; limb_width.classList.add('posex_joints', 'posex_limb_width');
+        limb_width_label.append(limb_width, document.createTextNode('Limb Width'));
         const elliptic_limbs_label = $('label');
         const elliptic_limbs = $('input'); elliptic_limbs.type = 'checkbox'; elliptic_limbs.classList.add('posex_joints', 'posex_elliptic_limbs'); elliptic_limbs.checked = true;
         elliptic_limbs_label.append(elliptic_limbs, document.createTextNode('Elliptic Limbs'));
@@ -154,6 +157,7 @@ const { init, init_3d } = await _import();
             bg_marker,
             bg_cont,
             joint_marker,
+            limb_width_label,
             elliptic_limbs_label,
         );
 
@@ -241,6 +245,7 @@ const { init, init_3d } = await _import();
             canvas_height,
             bg: bg_input,
             reset_bg,
+            limb_width,
             elliptic_limbs,
             save,
             copy,

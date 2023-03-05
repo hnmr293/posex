@@ -92,6 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         bg: document.querySelector('#bg_file'),
         reset_bg: document.querySelector('#reset_bg'),
         elliptic_limbs: document.querySelector('#elliptic_limbs'),
+        //joint_radius: document.querySelector('#joint_radius'),
+        limb_width: document.querySelector('#limb_width'),
         save: document.querySelector('#save_button'),
         copy: document.querySelector('#copy_button'),
         save_pose: document.querySelector('#save_pose'),
