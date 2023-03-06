@@ -2,6 +2,7 @@ import os
 import io
 import base64
 import json
+from typing import Callable
 from PIL import Image
 import gradio as gr
 from modules import scripts
@@ -43,52 +44,13 @@ class Script(scripts.Script):
             
             gr.HTML(value='', elem_id=id('html'))
             
-            sink = gr.HTML(value='', visible=False) # to suppress error in javascript
-            
-            base64_set = gr.Button(visible=False, elem_id=id('base64_set'))
-            base64 = gr.Textbox(visible=False, elem_id=id('base64'))
-            base64_sink = gr.Textbox(visible=False)
-            base64_set.click(fn=None, _js=js('base64'), outputs=[base64, base64_sink])
-            base64_sink.change(fn=None, _js=js('base64_after'), outputs=[sink])
-            
-            allposes = gr.Button(visible=False, elem_id=id('allposes_get'))
-            allposes_sink = gr.Textbox(visible=False)
-            allposes_sink2 = gr.Textbox(visible=False)
-            allposes.click(fn=wrap_api(all_pose), outputs=[allposes_sink, allposes_sink2])
-            allposes_sink2.change(fn=None, _js=js('allposes'), inputs=[allposes_sink], outputs=[sink])
-            
-            delpose_args_set = gr.Button(visible=False, elem_id=id('delpose_args_set'))
-            delpose_args = gr.Textbox(visible=False, elem_id=id('delpose_args'))
-            delpose_args_sink = gr.Textbox(visible=False)
-            delpose_args_set.click(fn=None, _js=js('delpose_args'), outputs=[delpose_args, delpose_args_sink])
-            delpose_args_sink.change(fn=None, _js=js('delpose_args_after'), outputs=[sink])
-            delpose = gr.Button(visible=False, elem_id=id('delpose_get'))
-            delpose_sink = gr.Textbox(visible=False)
-            delpose_sink2 = gr.Textbox(visible=False)
-            delpose.click(fn=wrap_api(delete_pose), inputs=[delpose_args], outputs=[delpose_sink, delpose_sink2])
-            delpose_sink2.change(fn=None, _js=js('delpose'), outputs=[sink])
-            
-            savepose_args_set = gr.Button(visible=False, elem_id=id('savepose_args_set'))
-            savepose_args = gr.Textbox(visible=False, elem_id=id('savepose_args'))
-            savepose_args_sink = gr.Textbox(visible=False)
-            savepose_args_set.click(fn=None, _js=js('savepose_args'), outputs=[savepose_args, savepose_args_sink])
-            savepose_args_sink.change(fn=None, _js=js('savepose_args_after'), outputs=[sink])
-            savepose = gr.Button(visible=False, elem_id=id('savepose_get'))
-            savepose_sink = gr.Textbox(visible=False)
-            savepose_sink2 = gr.Textbox(visible=False)
-            savepose.click(fn=wrap_api(save_pose), inputs=[savepose_args], outputs=[savepose_sink, savepose_sink2])
-            savepose_sink2.change(fn=None, _js=js('savepose'), outputs=[sink])
-            
-            loadpose_args_set = gr.Button(visible=False, elem_id=id('loadpose_args_set'))
-            loadpose_args = gr.Textbox(visible=False, elem_id=id('loadpose_args'))
-            loadpose_args_sink = gr.Textbox(visible=False)
-            loadpose_args_set.click(fn=None, _js=js('loadpose_args'), outputs=[loadpose_args, loadpose_args_sink])
-            loadpose_args_sink.change(fn=None, _js=js('loadpose_args_after'), outputs=[sink])
-            loadpose = gr.Button(visible=False, elem_id=id('loadpose_get'))
-            loadpose_sink = gr.Textbox(visible=False)
-            loadpose_sink2 = gr.Textbox(visible=False)
-            loadpose.click(fn=wrap_api(load_pose), inputs=[loadpose_args], outputs=[loadpose_sink, loadpose_sink2])
-            loadpose_sink2.change(fn=None, _js=js('loadpose'), inputs=[loadpose_sink], outputs=[sink])
+            with gr.Group(visible=False):
+                sink = gr.HTML(value='', visible=False) # to suppress error in javascript
+                base64 = js2py('base64', id, js, sink)
+                py2js('allposes', all_pose, id, js, sink)
+                jscall('delpose', delete_pose, id, js, sink)
+                jscall('savepose', save_pose, id, js, sink)
+                jscall('loadpose', load_pose, id, js, sink)
             
         return [enabled, base64]
 
@@ -108,6 +70,55 @@ class Script(scripts.Script):
             return
         
         opts.control_net_allow_script_control = False
+
+
+def js2py(
+    name: str,
+    id: Callable[[str], str],
+    js: Callable[[str], str],
+    sink: gr.components.IOComponent,
+) -> gr.Textbox:
+    
+    v_set = gr.Button(elem_id=id(f'{name}_set'))
+    v = gr.Textbox(elem_id=id(name))
+    v_sink = gr.Textbox()
+    v_set.click(fn=None, _js=js(name), outputs=[v, v_sink])
+    v_sink.change(fn=None, _js=js(f'{name}_after'), outputs=[sink])    
+    return v
+
+def py2js(
+    name: str,
+    fn: Callable[[], str],
+    id: Callable[[str], str],
+    js: Callable[[str], str],
+    sink: gr.components.IOComponent,
+) -> None:
+    
+    v_fire = gr.Button(elem_id=id(f'{name}_get'))
+    v_sink = gr.Textbox()
+    v_sink2 = gr.Textbox()
+    v_fire.click(fn=wrap_api(fn), outputs=[v_sink, v_sink2])
+    v_sink2.change(fn=None, _js=js(name), inputs=[v_sink], outputs=[sink])
+
+def jscall(
+    name: str,
+    fn: Callable[[str], str],
+    id: Callable[[str], str],
+    js: Callable[[str], str],
+    sink: gr.components.IOComponent,
+) -> None:
+    
+    v_args_set = gr.Button(elem_id=id(f'{name}_args_set'))
+    v_args = gr.Textbox(elem_id=id(f'{name}_args'))
+    v_args_sink = gr.Textbox()
+    v_args_set.click(fn=None, _js=js(f'{name}_args'), outputs=[v_args, v_args_sink])
+    v_args_sink.change(fn=None, _js=js(f'{name}_args_after'), outputs=[sink])
+    
+    v_fire = gr.Button(elem_id=id(f'{name}_get'))
+    v_sink = gr.Textbox()
+    v_sink2 = gr.Textbox()
+    v_fire.click(fn=wrap_api(fn), inputs=[v_args], outputs=[v_sink, v_sink2])
+    v_sink2.change(fn=None, _js=js(name), inputs=[v_sink], outputs=[sink])
 
 
 def get_self_extension():
@@ -136,9 +147,11 @@ def all_pose():
 
 def delete_pose(args):
     posex.delete_pose(json.loads(args)[0])
+    return ''
 
 def save_pose(args):
     posex.save_pose(json.loads(args)[0])
+    return ''
 
 def load_pose(args):
     return json.dumps(posex.load_pose(json.loads(args)[0]))
