@@ -77,7 +77,7 @@ class Script(scripts.Script):
         self.set_p_value(p, 'control_net_enabled', cn_num, True)
         self.set_p_value(p, 'control_net_input_image', cn_num, image)
     
-    def postprocess(self, p, processed, enabled: bool = False, b64: str = ''):
+    def postprocess(self, p, processed, enabled: bool = False, b64: str = '', cn_num: int = 0):
         if not enabled or b64 is None or len(b64) == 0:
             return
         
