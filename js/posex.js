@@ -607,9 +607,22 @@ function init_3d(ui) {
         mesh.geometry.setPoints(limb_vecs, elliptic_limbs ? elliptic_limb_width : stick_limb_width);
     }
 
+    let low_fps = ui.low_fps ? !!ui.low_fps.checked : false;
+    if (ui.low_fps)
+        ui.low_fps.addEventListener('change', () => {
+            low_fps = !!ui.low_fps.checked;
+        }, false);
+
     let last_zoom = camera.zoom;
     let running = true;
+    //const frames = [0,0,0,0,0,0,0,0,0,0], frame_index = 0;
+    let last_tick = globalThis.performance.now();
     const animate = () => {
+        const t0 = globalThis.performance.now();
+        //frames[(frame_index++)%frames.length] = t0 - last_tick;
+        //last_tick = t0;
+        //console.log(frames.reduce((acc, cur) => acc + cur) / frames.length);
+
         requestAnimationFrame(animate);
         if (!running) return;
 
@@ -620,6 +633,9 @@ function init_3d(ui) {
         }
         controls.update();
 
+        if (low_fps && t0 - last_tick < 30) return; // nearly 30fps
+        last_tick = t0;
+        
         for (let [name, body] of bodies) {
             const { joints, limbs, group } = body;
 

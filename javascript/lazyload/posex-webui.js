@@ -142,6 +142,10 @@ const { init, init_3d } = await _import();
         const elliptic_limbs_label = $('label');
         const elliptic_limbs = $('input'); elliptic_limbs.type = 'checkbox'; elliptic_limbs.classList.add('posex_joints', 'posex_elliptic_limbs'); elliptic_limbs.checked = true;
         elliptic_limbs_label.append(elliptic_limbs, document.createTextNode('Elliptic Limbs'));
+        const other_marker = $('div'); other_marker.textContent = '- Others';
+        const low_fps_label = $('label');
+        const low_fps = $('input'); low_fps.type = 'checkbox'; low_fps.classList.add('posex_low_fps', 'posex_others'); low_fps.checked = false;
+        low_fps_label.append(low_fps, document.createTextNode('Low fps'));
 
         const setting_cont = $('div');
         setting_cont.classList.add('posex_setting_cont');
@@ -159,6 +163,8 @@ const { init, init_3d } = await _import();
             joint_marker,
             limb_width_label,
             elliptic_limbs_label,
+            other_marker,
+            low_fps_label,
         );
 
         const canvas_cont = $('div');
@@ -247,6 +253,7 @@ const { init, init_3d } = await _import();
             reset_bg,
             limb_width,
             elliptic_limbs,
+            low_fps,
             save,
             copy,
             save_pose,
