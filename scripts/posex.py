@@ -111,8 +111,13 @@ class Script(scripts.Script):
 
 
 def get_self_extension():
+    if '__file__' in globals():
+        filepath = __file__
+    else:
+        import inspect
+        filepath = inspect.getfile(lambda: None)
     for ext in extensions.active():
-        if ext.path in __file__:
+        if ext.path in filepath:
             return ext
 
 # APIs
