@@ -11,7 +11,12 @@ from modules import extensions
 
 from common import posex_utils as posex
 
-posex.set_save_dir(os.path.join(os.path.dirname(__file__), '..', 'saved_poses'))
+if '__file__' in globals():
+    posex.set_save_dir(os.path.join(os.path.dirname(__file__), '..', 'saved_poses'))
+else:
+    # cf. https://stackoverflow.com/a/53293924
+    import inspect
+    posex.set_save_dir(os.path.join(os.path.dirname(inspect.getfile(lambda: None)), '..', 'saved_poses'))
 
 class Script(scripts.Script):
 
