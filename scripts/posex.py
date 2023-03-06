@@ -2,7 +2,7 @@ import os
 import io
 import base64
 import json
-from typing import Callable
+from typing import Callable, Any
 from PIL import Image
 import gradio as gr
 from modules import scripts
@@ -38,7 +38,9 @@ class Script(scripts.Script):
         js_.insert(0, ext.path)
         
         with gr.Accordion('Posex', open=False):
-            enabled = gr.Checkbox(value=False, label='Send this image to ControlNet.', elem_id=id('enabled'))
+            with gr.Row():
+                enabled = gr.Checkbox(value=False, label='Send this image to ControlNet.', elem_id=id('enabled'))
+                cn_num = gr.Number(value=0, precision=0, label='Target ControlNet number', visible=self.max_cn_num()!=1)
             
             gr.HTML(value='\n'.join(js_), elem_id=id('js'), visible=False)
             
@@ -52,24 +54,49 @@ class Script(scripts.Script):
                 jscall('savepose', save_pose, id, js, sink)
                 jscall('loadpose', load_pose, id, js, sink)
             
-        return [enabled, base64]
+        return [enabled, base64, cn_num]
 
-    def process(self, p: StableDiffusionProcessing, enabled: bool = False, b64: str = ''):
+    def process(self, p: StableDiffusionProcessing, enabled: bool = False, b64: str = '', cn_num: int = 0):
         if not enabled or b64 is None or len(b64) == 0:
             return
+        
+        cn_num = int(cn_num)
+        max_cn_num = self.max_cn_num()
+        if max_cn_num != 1:
+            v = (cn_num + max_cn_num) % max_cn_num
+            if v < 0:
+                raise ValueError(f'[posex] invalid ControlNet number: {cn_num}')
+            cn_num = v
+        else:
+            cn_num = 0
         
         binary = io.BytesIO(base64.b64decode(b64[len('data:image/png;base64,'):]))
         image = Image.open(binary)
         
         opts.control_net_allow_script_control = True
-        setattr(p, 'control_net_enabled', True)
-        setattr(p, 'control_net_input_image', image)
+        self.set_p_value(p, 'control_net_enabled', cn_num, True)
+        self.set_p_value(p, 'control_net_input_image', cn_num, image)
     
     def postprocess(self, p, processed, enabled: bool = False, b64: str = ''):
         if not enabled or b64 is None or len(b64) == 0:
             return
         
         opts.control_net_allow_script_control = False
+    
+    def set_p_value(self, p: StableDiffusionProcessing, attr: str, idx: int, v: Any):
+        value = getattr(p, attr, None)
+        if isinstance(value, list):
+            value[idx] = v
+        else:
+            # if value is None, ControlNet uses default value
+            value = [value] * self.max_cn_num()
+            value[idx] = v
+        setattr(p, attr, value)
+    
+    def max_cn_num(self):
+        if opts.data is None:
+            return 1
+        return int(opts.data.get('control_net_max_models_num', 1))
 
 
 def js2py(
