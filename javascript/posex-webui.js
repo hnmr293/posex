@@ -50,7 +50,7 @@
         const i2i_callback = () => {
             if (!posex.t2i_called) {
                 posex.t2i_called = true;
-                load(t2i_called);
+                load(t2i_cont);
             }
         };
         
