@@ -1,5 +1,3 @@
-console.log('[Posex] loading...');
-
 async function _import() {
     if (!globalThis.posex || !globalThis.posex.import) {
         return await import('posex');
@@ -329,6 +327,7 @@ const { init, init_3d } = await _import();
         animate();
 
         onUiTabChange(() => {
+            debugger;
             const tabname = get_uiCurrentTabContent().id;
             if (type === 't2i') {
                 if (0 <= tabname.indexOf('txt2img')) {
@@ -348,25 +347,40 @@ const { init, init_3d } = await _import();
         });
     }
 
-    const app = gradioApp();
-    await init_canvas(
-        't2i',
-        app.querySelector('#posex-t2i-enabled input[type=checkbox]'),
-        app.querySelector('#txt2img_generate'),
-        app.querySelector('#posex-t2i-html'),
-        {
-            load_all_poses: app.querySelector('#posex-t2i-api-all_pose'),
-            delete_pose: app.querySelector('#posex-t2i-api-delete_pose'),
-        }
-    );
-    await init_canvas(
-        'i2i',
-        app.querySelector('#posex-i2i-enabled input[type=checkbox]'),
-        app.querySelector('#img2img_generate'),
-        app.querySelector('#posex-i2i-html'),
-        {
-            load_all_poses: app.querySelector('#posex-i2i-api-all_pose'),
-            delete_pose: app.querySelector('#posex-i2i-api-delete_pose'),
-        }
-    );
+    async function init_t2i() {
+        const app = gradioApp();
+        await init_canvas(
+            't2i',
+            app.querySelector('#posex-t2i-enabled input[type=checkbox]'),
+            app.querySelector('#txt2img_generate'),
+            app.querySelector('#posex-t2i-html'),
+            {
+                load_all_poses: app.querySelector('#posex-t2i-api-all_pose'),
+                delete_pose: app.querySelector('#posex-t2i-api-delete_pose'),
+            }
+        );
+    }
+
+    async function init_i2i() {
+        const app = gradioApp();
+        await init_canvas(
+            'i2i',
+            app.querySelector('#posex-i2i-enabled input[type=checkbox]'),
+            app.querySelector('#img2img_generate'),
+            app.querySelector('#posex-i2i-html'),
+            {
+                load_all_poses: app.querySelector('#posex-i2i-api-all_pose'),
+                delete_pose: app.querySelector('#posex-i2i-api-delete_pose'),
+            }
+        );
+    }
+
+    if (!globalThis.posex) globalThis.posex = {};
+    const posex = globalThis.posex;
+    posex.init_t2i = init_t2i;
+    posex.init_i2i = init_i2i;
+
+    posex.script_loaded = true;
+    document.dispatchEvent(new CustomEvent('posexscriptloaded'));
+
 })();

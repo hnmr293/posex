@@ -37,7 +37,7 @@ class Script(scripts.Script):
         js_ = [f'{x.path}?{os.path.getmtime(x.path)}' for x in ext.list_files('javascript/lazyload', '.js')]
         js_.insert(0, ext.path)
         
-        with gr.Accordion('Posex', open=False):
+        with gr.Accordion('Posex', open=False, elem_id=id('accordion')):
             with gr.Row():
                 enabled = gr.Checkbox(value=False, label='Send this image to ControlNet.', elem_id=id('enabled'))
                 cn_num = gr.Number(value=0, precision=0, label='Target ControlNet number', visible=self.max_cn_num()!=1)
