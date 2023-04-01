@@ -352,7 +352,7 @@ const { init, init_3d } = await _import();
             't2i',
             app.querySelector('#posex-t2i-enabled input[type=checkbox]'),
             app.querySelector('#txt2img_generate'),
-            app.querySelector('#posex-t2i-html'),
+            Array.from(app.querySelectorAll('#posex-t2i-html')).at(-1), // !
             {
                 load_all_poses: app.querySelector('#posex-t2i-api-all_pose'),
                 delete_pose: app.querySelector('#posex-t2i-api-delete_pose'),
@@ -366,7 +366,7 @@ const { init, init_3d } = await _import();
             'i2i',
             app.querySelector('#posex-i2i-enabled input[type=checkbox]'),
             app.querySelector('#img2img_generate'),
-            app.querySelector('#posex-i2i-html'),
+            Array.from(app.querySelectorAll('#posex-i2i-html')).at(-1), // !
             {
                 load_all_poses: app.querySelector('#posex-i2i-api-all_pose'),
                 delete_pose: app.querySelector('#posex-i2i-api-delete_pose'),

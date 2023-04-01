@@ -72,15 +72,14 @@
     function launch(type) {
         return lazy(() => gradioApp()?.querySelector(`#posex-${type}-accordion`)).
             then(acc => hook_acc(acc, async () => {
-                const cont = acc.querySelector(`#posex-${type}-js`);
+                const cont = Array.from(acc.querySelectorAll(`#posex-${type}-js`)).at(-1); // !
                 const enabled = acc.querySelector(`#posex-${type}-enabled input[type=checkbox]`);
+                await load(cont);
                 if (enabled.checked) {
-                    await load(cont);
                     await posex[`init_${type}`]();
                     console.log(`[Posex] ${type} initialized`);
                 } else {
                     enabled.addEventListener('change', async () => {
-                        await load(cont);
                         await posex[`init_${type}`]();
                         console.log(`[Posex] ${type} initialized`);
                     }, { once: true });
@@ -88,7 +87,7 @@
             }));
     }
     
-    launch('t2i').then(() => console.log('[Posex] t2i initialized'));
-    launch('i2i').then(() => console.log('[Posex] i2i initialized'));
+    launch('t2i');
+    launch('i2i');
 
 })();
