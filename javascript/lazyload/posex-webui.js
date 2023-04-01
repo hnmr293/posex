@@ -327,7 +327,6 @@ const { init, init_3d } = await _import();
         animate();
 
         onUiTabChange(() => {
-            debugger;
             const tabname = get_uiCurrentTabContent().id;
             if (type === 't2i') {
                 if (0 <= tabname.indexOf('txt2img')) {
