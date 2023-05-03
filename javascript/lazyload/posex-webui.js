@@ -11,7 +11,7 @@ const { init, init_3d } = await _import();
     let _r = 0;
     function to_gradio(v) {
         // force call `change` event on gradio
-        return [v, _r++];
+        return [v.toString(), (_r++).toString()];
     }
 
     function js2py(type, gradio_field, value) {
@@ -290,7 +290,7 @@ const { init, init_3d } = await _import();
         ui.container = container;
         ui.notify = function (str, type) { if (type === 'error') console.error(str); };
 
-        {
+        if (!posex[`${type}_click`]) {
             // Send canvas image to ControlNet when button is clicked.
             let force = false;
             gradioApp().addEventListener('click', async e => {
@@ -312,6 +312,7 @@ const { init, init_3d } = await _import();
                 force = true;
                 generate_button.click();
             }, true);
+            posex[`${type}_click`] = true;
         }
 
         {
