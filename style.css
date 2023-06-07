@@ -11,10 +11,6 @@
     max-width: 100%;
 }
 
-.posex_cont input[type=checkbox] {
-    appearance: auto;
-}
-
 .posex_reset_cont {
     display: flex;
     flex-direction: row;
@@ -39,7 +35,7 @@
 }
 
 .posex_canvas_size {
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
 .posex_setting_cont {
@@ -67,7 +63,6 @@
     flex: 0 0 0;
     border: 1px solid gray;
     padding: 0.25em 1em;
-    min-width: 5em;
 }
 
 .posex_notation {

@@ -13,7 +13,6 @@ const { THREE, TrackballControls, DragControls, MeshLine, MeshLineMaterial } = a
 
 const JOINT_RADIUS = 4.0;
 const LIMB_SIZE = 4.0;
-const LIMB_N = 64;
 
 const joint_names = [
     'nose',
@@ -126,10 +125,11 @@ function create_body(unit, x0, y0, z0) {
     }
 
     for (let i = 0; i < limb_pairs.length; ++i) {
+        const [from_idx, to_idx] = limb_pairs[i];
         const [r, g, b] = joint_colors[i];
         const color = (r << 16) | (g << 8) | (b << 0);
         const line = new MeshLine();
-        const mat = new MeshLineMaterial({ color: color, opacity: 0.6, transparent: true });
+        const mat = new MeshLineMaterial({ color: color });
         limbs.push(new THREE.Mesh(line, mat));
     }
 
@@ -148,10 +148,6 @@ function init_3d(ui) {
         unit = () => Math.min(width(), height()),
         unit_max = () => Math.max(width(), height());
 
-    canvas.addEventListener('contextmenu', e => {
-        e.preventDefault();
-    }, false);
-
     const scene = new THREE.Scene();
     const default_bg = () => new THREE.Color(0x000000);
     scene.background = default_bg();
@@ -161,7 +157,7 @@ function init_3d(ui) {
 
     const renderer = new THREE.WebGLRenderer({
         canvas: canvas,
-        antialias: true,
+        antialias: false,
         alpha: true,
         preserveDrawingBuffer: true,
     });
@@ -288,7 +284,7 @@ function init_3d(ui) {
         e.object.dirty = true;
         object_to_body.get(e.object).dirty = true;
     });
-
+    
     dragger_body.addEventListener('dragstart', () => { controls.enabled = false; });
     dragger_body.addEventListener('dragend', () => { controls.enabled = true; });
     dragger_body.addEventListener('drag', e => {
@@ -390,7 +386,7 @@ function init_3d(ui) {
         ui.fixed_roll.addEventListener('change', () => {
             camera.fixed_roll = !!ui.fixed_roll.checked;
         }, false);
-
+    
     let body_num = 1;
     if (ui.add_body)
         ui.add_body.addEventListener('click', () => {
@@ -479,10 +475,10 @@ function init_3d(ui) {
             }
             ui.bg.value = '';
         }, false);
-
+    
     if (ui.reset_bg)
         ui.reset_bg.addEventListener('click', () => set_bg(null), false);
-
+    
     function get_pose_dict(obj3d) {
         return {
             position: obj3d.position.toArray(),
@@ -508,10 +504,10 @@ function init_3d(ui) {
                 width: width(),
                 height: height(),
             }
-
+            
             const camera_ = get_pose_dict(camera);
             camera_.zoom = camera.zoom;
-
+            
             const joints = [];
             for (let [name, body] of bodies) {
                 joints.push({
@@ -523,106 +519,19 @@ function init_3d(ui) {
                     z0: body.z0,
                 });
             }
-
+            
             const image = await ui.getDataURL();
-
+            
             const data = { name, image, screen, camera: camera_, joints };
             const result = await ui.save_pose_callback(data);
             ui.notify(result.result, result.ok ? 'success' : 'error');
         }, false);
-
+    
     const onAnimateEndOneshot = [];
-
-    // joint and limb update
-    let elliptic_limbs = ui.elliptic_limbs ? !!ui.elliptic_limbs.checked : true;
-    //let joint_size_m = ui.joint_radius ? +ui.joint_radius.value / JOINT_RADIUS : 1.0;
-    let limb_size_m = ui.limb_width ? +ui.limb_width.value / LIMB_SIZE : 1.0;
-    if (ui.elliptic_limbs)
-        ui.elliptic_limbs.addEventListener('change', () => {
-            const b = !!ui.elliptic_limbs.checked;
-            if (elliptic_limbs !== b) {
-                elliptic_limbs = b;
-                for (let body of bodies.values()) {
-                    body.dirty = true;
-                    for (let i = 0; i < body.joints.length; ++i) {
-                        body.joints[i].dirty = true;
-                    }
-                }
-            }
-        }, false);
-
-    //if (ui.joint_radius)
-    //    ui.joint_radius.addEventListener('input', () => {
-    //        const new_val = +ui.joint_radius.value / JOINT_RADIUS;
-    //        if (joint_size_m !== new_val) {
-    //            joint_size_m = new_val;
-    //            for (let body of bodies.values()) {
-    //                body.dirty = true;
-    //                for (let i = 0; i < body.joints.length; ++i) {
-    //                    body.joints[i].dirty = true;
-    //                }
-    //            }
-    //        }
-    //    }, false);
-
-    if (ui.limb_width)
-        ui.limb_width.addEventListener('input', () => {
-            const new_val = +ui.limb_width.value / LIMB_SIZE;
-            if (limb_size_m !== new_val) {
-                limb_size_m = new_val;
-                for (let body of bodies.values()) {
-                    body.dirty = true;
-                    for (let i = 0; i < body.joints.length; ++i) {
-                        body.joints[i].dirty = true;
-                    }
-                }
-            }
-        }, false);
-
-    const limb_vecs = Array.from(Array(LIMB_N)).map(x => new THREE.Vector3());
-    function elliptic_limb_width(p) {
-        // draw limb ellipse
-        //   x^2 / a^2 + y^2 / b^2 = 1
-        //     a := half of distance between two joints
-        //     b := 2 * LIMB_SIZE / camera.zoom
-        //   {a(2p-1)}^2 / a^2 + y^2 / b^2 = 1
-        //   y^2 = b^2 { 1 - (2p-1)^2 }
-        const b = 2 * LIMB_SIZE * limb_size_m / camera.zoom;
-        const pp = 2 * p - 1;
-        return b * Math.sqrt(1 - pp * pp);
-    }
-    function stick_limb_width(p) {
-        // half width of ellipse
-        return LIMB_SIZE * limb_size_m / camera.zoom;
-    }
-    function create_limb(mesh, from, to) {
-        const s0 = limb_vecs[0];
-        const s1 = limb_vecs[LIMB_N - 1];
-        from.getWorldPosition(s0);
-        to.getWorldPosition(s1);
-        const N = LIMB_N - 1;
-        for (let i = 1; i < limb_vecs.length - 1; ++i) {
-            limb_vecs[i].lerpVectors(s0, s1, i / N);
-        }
-        mesh.geometry.setPoints(limb_vecs, elliptic_limbs ? elliptic_limb_width : stick_limb_width);
-    }
-
-    let low_fps = ui.low_fps ? !!ui.low_fps.checked : false;
-    if (ui.low_fps)
-        ui.low_fps.addEventListener('change', () => {
-            low_fps = !!ui.low_fps.checked;
-        }, false);
 
     let last_zoom = camera.zoom;
     let running = true;
-    //const frames = [0,0,0,0,0,0,0,0,0,0], frame_index = 0;
-    let last_tick = globalThis.performance.now();
     const animate = () => {
-        const t0 = globalThis.performance.now();
-        //frames[(frame_index++)%frames.length] = t0 - last_tick;
-        //last_tick = t0;
-        //console.log(frames.reduce((acc, cur) => acc + cur) / frames.length);
-
         requestAnimationFrame(animate);
         if (!running) return;
 
@@ -633,28 +542,26 @@ function init_3d(ui) {
         }
         controls.update();
 
-        if (low_fps && t0 - last_tick < 30) return; // nearly 30fps
-        last_tick = t0;
-        
         for (let [name, body] of bodies) {
             const { joints, limbs, group } = body;
-
+            
             // update joint size
             for (let joint of joints) {
                 joint.scale.setScalar(1 / camera.zoom);
             }
-
+            
             // show limbs
             const zoom_changed = last_zoom !== camera.zoom;
             if (body.dirty || zoom_changed) {
+                const v1 = new THREE.Vector3(), v2 = new THREE.Vector3();
                 for (let i = 0; i < limb_pairs.length; ++i) {
                     const [from_index, to_index] = limb_pairs[i];
                     const [from, to] = [joints[from_index], joints[to_index]];
                     if (from.dirty || to.dirty || zoom_changed) {
-                        create_limb(limbs[i], from, to);
+                        limbs[i].geometry.setPoints([from.getWorldPosition(v1), to.getWorldPosition(v2)], p => LIMB_SIZE / camera.zoom);
                     }
                 }
-
+                
                 for (let i = 0; i < joints.length; ++i) {
                     joints[i].dirty = false;
                 }
@@ -698,7 +605,7 @@ function init_3d(ui) {
         onAnimateEndOneshot.length = 0;
     };
 
-    ui.loadPose = function (data) {
+    ui.loadPose = function(data) {
         selected_body = null;
         touched_body = null;
         touchable_objects.length = 0;
@@ -712,25 +619,13 @@ function init_3d(ui) {
         size_change(data.screen.width, data.screen.height);
         if (width_input) width_input.value = data.screen.width;
         if (height_input) height_input.value = data.screen.height;
-
+        
         // camera
         set_pose_dict(camera, data.camera);
         camera.zoom = data.camera.zoom;
         camera.updateProjectionMatrix();
-
+        
         // bodies
-
-        // update `body_num`
-        const body_names = data.joints.map(x => {
-            const m = /^body_(\d+)$/.exec(x.name);
-            return m ? +m[1] : -1;
-        }).filter(x => 0 <= x);
-        if (body_names.length == 0) {
-            body_num = 0;
-        } else {
-            body_num = Math.max(...body_names) + 1;
-        }
-
         for (let dict of data.joints) {
             const body = add_body(dict.name, dict.x0, dict.y0, dict.z0);
             for (let i = 0, e = Math.min(body.joints.length, dict.joints.length); i < e; ++i) {
@@ -740,7 +635,7 @@ function init_3d(ui) {
         }
     };
 
-    ui.getDataURL = async function () {
+    ui.getDataURL = async function() {
         const pr = new Promise(resolve => {
             const current_bg = scene.background;
             set_bg(null, true);
@@ -752,7 +647,7 @@ function init_3d(ui) {
         return await pr;
     };
 
-    ui.getBlob = async function () {
+    ui.getBlob = async function() {
         const pr = new Promise(resolve => {
             const current_bg = scene.background;
             set_bg(null, true);
@@ -766,7 +661,7 @@ function init_3d(ui) {
         return await pr;
     };
 
-    ui.stop = function () {
+    ui.stop = function() {
         running = false;
         dragger_joint.deactivate();
         dragger_joint.enabled = false;
@@ -775,7 +670,7 @@ function init_3d(ui) {
         controls.enabled = false;
     };
 
-    ui.play = function () {
+    ui.play = function() {
         running = true;
         dragger_joint.activate();
         dragger_joint.enabled = true;
@@ -784,7 +679,7 @@ function init_3d(ui) {
         controls.enabled = true;
         controls.handleResize();
     };
-
+    
     return animate;
 }
 

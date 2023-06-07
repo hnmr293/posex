@@ -4,10 +4,10 @@ function notify(str, type) {
     if (type === undefined) type = 'success';
 
     switch (type) {
-        case 'success': console.log(str); break;
-        case 'info': console.log(str); break;
-        case 'warn': console.warn(str); break;
-        case 'error': console.error(str); break;
+    case 'success': console.log(str); break;
+    case 'info': console.log(str); break;
+    case 'warn': console.warn(str); break;
+    case 'error': console.error(str); break;
     }
 
     const p = document.createElement('p');
@@ -43,14 +43,14 @@ async function delete_pose(name) {
 
 async function reload_poses() {
     POSES.clear();
-
+    
     const res = await fetch('/pose/all');
     const cont = document.querySelector('#saved_poses');
     cont.innerHTML = '';
     const df = document.createDocumentFragment();
     for (let data of await res.json()) {
         POSES.set(data.name, data);
-
+        
         const fig = document.createElement('figure')
         const img = document.createElement('img');
         const cap = document.createElement('figcaption');
@@ -63,18 +63,18 @@ async function reload_poses() {
         clo2.classList.add('close2');
         clo2.textContent = 'delete';
         clo.appendChild(clo2);
-
+        
         img.src = 'data:image/png;base64,' + data.image;
         img.title = data.name;
         fig.append(clo, img, cap);
-
+        
         df.appendChild(fig);
     }
     cont.appendChild(df);
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-
+    
     const ui = {
         container: document.querySelector('#cont'),
         canvas: document.querySelector('#main_canvas'),
@@ -91,10 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         canvas_height: document.querySelector('#canvas_height'),
         bg: document.querySelector('#bg_file'),
         reset_bg: document.querySelector('#reset_bg'),
-        elliptic_limbs: document.querySelector('#elliptic_limbs'),
-        //joint_radius: document.querySelector('#joint_radius'),
-        limb_width: document.querySelector('#limb_width'),
-        low_fps: document.querySelector('#low_fps'),
         save: document.querySelector('#save_button'),
         copy: document.querySelector('#copy_button'),
         save_pose: document.querySelector('#save_pose'),
@@ -108,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, false);
 
     const { init, init_3d } = await import('posex');
-
+    
     init(ui);
     const animate = init_3d(ui);
     animate();
@@ -126,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return '';
     };
-
+    
     document.querySelector('#saved_poses').addEventListener('click', e => {
         let target = e.target;
         if (target.tagName === 'IMG') target = target.parentNode;
