@@ -6,7 +6,7 @@
         function load_() {
             if (posex.script_loading || posex.script_loaded) return;
             posex.script_loading = true;
-            
+
             const scripts = cont.textContent.trim().split('\n');
             const base_path = `/file=${scripts.shift()}/js`;
             cont.textContent = '';
@@ -52,42 +52,64 @@
         });
     }
 
-    function hook_acc(acc, fn) {
-        const observer = new MutationObserver(list => {
-            for (let mut of list) {
-                if (mut.type === 'childList') {
-                    if (mut.addedNodes.length != 0) {
-                        // closed -> opened
-                        fn();
-                    } else {
-                        // opened -> closed
-                        // do nothing
-                    }
-                }
-            }
-        });
-        observer.observe(acc, { childList: true, attributes: false, subtree: false });
-    }
-
-    function launch(type) {
-        return lazy(() => gradioApp()?.querySelector(`#posex-${type}-accordion`)).
-            then(acc => hook_acc(acc, async () => {
-                const cont = Array.from(acc.querySelectorAll(`#posex-${type}-js`)).at(-1); // !
-                const enabled = acc.querySelector(`#posex-${type}-enabled input[type=checkbox]`);
-                await load(cont);
-                if (enabled.checked) {
-                    await posex[`init_${type}`]();
-                    console.log(`[Posex] ${type} initialized`);
-                } else {
-                    enabled.addEventListener('change', async () => {
+    // function hook_acc(acc, fn) {
+    //     const observer = new MutationObserver(list => {
+    //         for (let mut of list) {
+    //             if (mut.type === 'childList') {
+    //                 if (mut.addedNodes.length != 0) {
+    //                     // closed -> opened
+    //                     fn();
+    //                 } else {
+    //                     // opened -> closed
+    //                     // do nothing
+    //                 }
+    //             }
+    //         }
+    //     });
+    //     observer.observe(acc, { childList: true, attributes: false, subtree: false });
+    // }
+    window.addEventListener('DOMContentLoaded', () => {
+        const observer = new MutationObserver((m) => {
+            const types = ['t2i', 'i2i']
+            types.forEach(async (type) => {
+                if (gradioApp().querySelector(`#posex-${type}-accordion`) && gradioApp()?.querySelector(`#posex-${type}-accordion`)) {
+                    const acc = gradioApp()?.querySelector(`#posex-${type}-accordion`);
+                    const cont = Array.from(acc.querySelectorAll(`#posex-${type}-js`)).at(-1);
+                    const enabled = acc.querySelector(`#posex-${type}-enabled input[type=checkbox]`);
+                    await load(cont);
+                    if (enabled.checked) {
                         await posex[`init_${type}`]();
                         console.log(`[Posex] ${type} initialized`);
-                    }, { once: true });
+                    } else {
+                        enabled.addEventListener('change', async () => {
+                            await posex[`init_${type}`]();
+                            console.log(`[Posex] ${type} initialized`);
+                        }, { once: true });
+                    }
+                    observer.disconnect();
                 }
-            }));
-    }
-    
-    launch('t2i');
-    launch('i2i');
+            })
 
+        })
+        observer.observe(depth_gradioApp(), { childList: true, subtree: true })
+    })
+    // function launch(type) {
+    //     return lazy(() => gradioApp()?.querySelector(`#posex-${type}-accordion`)).
+    //         then(acc => hook_acc(acc, async () => {
+    //             const cont = Array.from(acc.querySelectorAll(`#posex-${type}-js`)).at(-1); // !
+    //             const enabled = acc.querySelector(`#posex-${type}-enabled input[type=checkbox]`);
+    //             await load(cont);
+    //             if (enabled.checked) {
+    //                 await posex[`init_${type}`]();
+    //                 console.log(`[Posex] ${type} initialized`);
+    //             } else {
+    //                 enabled.addEventListener('change', async () => {
+    //                     await posex[`init_${type}`]();
+    //                     console.log(`[Posex] ${type} initialized`);
+    //                 }, { once: true });
+    //             }
+    //         }));
+    // }
+    // launch('t2i');
+    // launch('i2i');
 })();
