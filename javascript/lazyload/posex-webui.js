@@ -1,8 +1,8 @@
-async function _import() {
+function _import() {
     if (!globalThis.posex || !globalThis.posex.import) {
-        return await import('posex');
+        return import('posex');
     } else {
-        return await globalThis.posex.imports.posex();
+        return globalThis.posex.imports.posex();
     }
 }
 const { init, init_3d } = await _import();
@@ -92,7 +92,7 @@ const { init, init_3d } = await _import();
         ui.saved_poses.appendChild(df);
     }
 
-    function init_ui(type, api) {
+    function init_ui(type) {
         const $ = x => document.createElement(x);
 
         const all_reset = $('button');
@@ -258,7 +258,7 @@ const { init, init_3d } = await _import();
             save_pose_callback,
             saved_poses,
         };
-
+        // init_3d(ui);
         const df = document.createDocumentFragment();
         df.append(
             all_reset,
@@ -322,9 +322,7 @@ const { init, init_3d } = await _import();
         }
 
         init(ui);
-
         const animate = init_3d(ui);
-
         animate();
 
         onUiTabChange(() => {
